@@ -1,0 +1,195 @@
+:root {
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --text: #1b2430;
+  --muted: #5b6775;
+  --completed: #1f9d55;
+  --completed-bg: #e7f8ee;
+  --available: #1d6fd8;
+  --available-bg: #e8f1fc;
+  --locked: #8a93a0;
+  --locked-bg: #eceef1;
+  --shadow: 0 8px 24px rgba(27, 36, 48, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+}
+
+.lead {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.progress-panel {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px 20px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.progress-bar {
+  height: 10px;
+  background: #dfe5ee;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--completed);
+  border-radius: inherit;
+}
+
+.stages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.stage-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 150px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: inherit;
+  border: 2px solid transparent;
+}
+
+.stage-card h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  flex: 1;
+}
+
+.stage-number,
+.stage-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stage-card.status-completed {
+  border-color: var(--completed);
+  background: var(--completed-bg);
+}
+
+.stage-card.status-completed .stage-status,
+.stage-card.status-completed .stage-number {
+  color: var(--completed);
+}
+
+.stage-card.status-available {
+  border-color: var(--available);
+  background: var(--available-bg);
+}
+
+.stage-card.status-available .stage-status,
+.stage-card.status-available .stage-number {
+  color: var(--available);
+}
+
+.stage-card.status-locked {
+  border-color: var(--locked);
+  background: var(--locked-bg);
+  color: var(--locked);
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.stage-card.status-locked .stage-status,
+.stage-card.status-locked .stage-number {
+  color: var(--locked);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  color: var(--available);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.stage-page {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--available);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  filter: brightness(0.95);
+}
+
+.home-footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #e3e8f0;
+  text-align: right;
+}
+
+.btn-reset {
+  padding: 8px 14px;
+  border: 1px solid #d5dce6;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-reset:hover {
+  border-color: #d64545;
+  color: #d64545;
+  background: #fdecec;
+}

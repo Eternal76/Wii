@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Этап 2 — Анимация</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/stage.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back-link" href="index.html">← На главную</a>
+    <article class="stage-page">
+      <h1>Этап 2. Анимация</h1>
+      <h2 class="anim-title" id="anim-title">Загрузка…</h2>
+      <p class="lead">Нажимайте «Шаг вперёд», чтобы пошагово выполнить код и следить за переменными.</p>
+
+      <div class="anim-layout">
+        <section class="anim-code-panel" aria-label="Код программы">
+          <h3 class="anim-heading">Код</h3>
+          <ol class="anim-code" id="anim-code"></ol>
+        </section>
+
+        <aside class="anim-side">
+          <section aria-label="Таблица переменных">
+            <h3 class="anim-heading">Переменные</h3>
+            <table class="vars-table">
+              <thead>
+                <tr><th>Переменная</th><th>Значение</th></tr>
+              </thead>
+              <tbody id="vars-body"></tbody>
+            </table>
+          </section>
+
+          <section aria-label="Пояснение шага" class="anim-explanation-box">
+            <h3 class="anim-heading">Пояснение</h3>
+            <p class="anim-explanation" id="anim-explanation">Нажмите «Шаг вперёд», чтобы начать.</p>
+          </section>
+        </aside>
+      </div>
+
+      <div class="anim-actions">
+        <button type="button" class="btn" id="step-forward">Шаг вперёд</button>
+        <button type="button" class="btn btn-secondary" id="anim-reset">Сброс</button>
+        <button type="button" class="btn" id="anim-finish" hidden>Этап пройден!</button>
+      </div>
+      <p id="anim-status" class="quiz-status" hidden></p>
+    </article>
+  </main>
+  <script src="js/app.js"></script>
+  <script src="js/stage2.js"></script>
+</body>
+</html>

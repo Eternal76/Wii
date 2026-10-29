@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Этап 4 — Отладчик</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="css/stage.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back-link" href="index.html">← На главную</a>
+    <article class="stage-page">
+      <h1>Этап 4. Отладчик</h1>
+      <h2 class="task-title" id="task-title">Загрузка…</h2>
+      <p class="lead" id="task-description"></p>
+
+      <label class="field-label" for="editor">Код</label>
+      <textarea id="editor"></textarea>
+
+      <div class="editor-actions">
+        <button type="button" class="btn" id="run-code">Запустить код</button>
+      </div>
+
+      <h3 class="anim-heading">Вывод</h3>
+      <pre id="output-area" class="output-area">Загрузка Python...</pre>
+
+      <h3 class="anim-heading">Подсказки</h3>
+      <div class="hint-actions">
+        <button type="button" class="btn btn-secondary" data-hint="1">Подсказка 1</button>
+        <button type="button" class="btn btn-secondary" data-hint="2">Подсказка 2</button>
+        <button type="button" class="btn btn-secondary" data-hint="3">Подсказка 3</button>
+      </div>
+      <p id="hint-area" class="hint-area" hidden></p>
+    </article>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pyodide-runner.js"></script>
+  <script src="js/stage4.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "task_1",
+    "title": "Поиск максимальной длины без 'A'",
+    "description": "Программа должна найти максимальную длину непрерывной подстроки, состоящей только из символов, отличных от 'A'. В коде есть 2 ошибки. Запустите его и найдите их.",
+    "buggy_code": "max_len = 0\nwith open('input.txt') as f:\n    for line in f:\n        s = line.strip()\n        cur = 0\n        for i in range(len(s) - 1):\n            if s[i] == 'A':\n                cur += 1\n                if cur > max_len:\n                    max_len = cur\n            else:\n                cur = 0\nprint(max_len)",
+    "input_data": "BBBBB\nAA\nBBBB\nA\nB",
+    "expected_output": "5"
+  }
+]

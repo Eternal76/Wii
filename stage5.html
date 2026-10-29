@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Этап 5 — Самостоятельное написание</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="css/stage.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back-link" href="index.html">← На главную</a>
+    <article class="stage-page">
+      <h1>Этап 5. Самостоятельное написание</h1>
+      <h2 class="task-title" id="task-title">Загрузка…</h2>
+      <p class="lead" id="task-description"></p>
+      <p class="builder-help">Файл с данными доступен программе как <code>input.txt</code> в текущей папке.</p>
+
+      <label class="field-label" for="editor">Ваш код</label>
+      <textarea id="editor"></textarea>
+
+      <div class="editor-actions">
+        <button type="button" class="btn" id="check-small">Проверить на маленьком файле</button>
+        <button type="button" class="btn" id="check-big">Проверить на большом файле</button>
+      </div>
+
+      <h3 class="anim-heading">Вывод</h3>
+      <pre id="output-area" class="output-area">Загрузка Python...</pre>
+
+      <section id="reflection-block" class="reflection-block" hidden aria-label="Рефлексия">
+        <h2 class="reflection-title">Рефлексия</h2>
+        <p class="reflection-intro">Вы прошли оба теста. Ответьте на вопросы, чтобы завершить тренажёр.</p>
+        <div id="reflection-questions" class="reflection-questions"></div>
+        <button type="button" class="btn" id="finish-trainer">Завершить тренажёр</button>
+      </section>
+    </article>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pyodide-runner.js"></script>
+  <script src="js/stage5.js"></script>
+</body>
+</html>

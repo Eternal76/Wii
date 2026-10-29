@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Этап 1 — Синтаксис</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/stage.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back-link" href="index.html">← На главную</a>
+    <article class="stage-page">
+      <h1>Этап 1. Синтаксис</h1>
+      <section class="quiz-progress progress-panel" aria-label="Прогресс ответов">
+        <div class="progress-meta">
+          <span>Отвечено <strong id="answered-count">0</strong> из <strong id="total-count">0</strong></span>
+          <span id="answered-percent">0%</span>
+        </div>
+        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="answered-bar">
+          <div class="progress-bar-fill" id="answered-bar-fill" style="width:0%"></div>
+        </div>
+      </section>
+      <div id="questions" class="questions"></div>
+      <div id="quiz-actions" class="quiz-actions"></div>
+      <p id="quiz-status" class="quiz-status" hidden></p>
+    </article>
+  </main>
+  <script src="js/app.js"></script>
+  <script src="js/stage1.js"></script>
+</body>
+</html>

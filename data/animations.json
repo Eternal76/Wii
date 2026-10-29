@@ -1,0 +1,41 @@
+[
+  {
+    "id": "anim_1",
+    "title": "Поиск максимальной длины без символа 'X'",
+    "code": "s = \"ABCXABCABC\"\nmax_len = 0\ncurrent = 0\nfor c in s:\n    if c != 'X':\n        current += 1\n    else:\n        if current > max_len:\n            max_len = current\n        current = 0\nif current > max_len:\n    max_len = current\nprint(max_len)",
+    "variables": ["s", "c", "current", "max_len"],
+    "steps": [
+      {"line": 0, "vars": {"s": "\"ABCXABCABC\"", "c": "-", "current": "0", "max_len": "0"}, "explanation": "Инициализация строки s."},
+      {"line": 1, "vars": {"s": "\"ABCXABCABC\"", "c": "-", "current": "0", "max_len": "0"}, "explanation": "Создаем переменную для максимума."},
+      {"line": 2, "vars": {"s": "\"ABCXABCABC\"", "c": "-", "current": "0", "max_len": "0"}, "explanation": "Создаем счетчик текущей длины."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "A", "current": "0", "max_len": "0"}, "explanation": "Начинаем цикл. Берем первый символ 'A'."},
+      {"line": 4, "vars": {"s": "\"ABCXABCABC\"", "c": "A", "current": "0", "max_len": "0"}, "explanation": "Проверяем: 'A' не равно 'X'. Условие истинно (True)."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "A", "current": "1", "max_len": "0"}, "explanation": "Увеличиваем текущую длину на 1."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "B", "current": "1", "max_len": "0"}, "explanation": "Следующий символ 'B'."},
+      {"line": 4, "vars": {"s": "\"ABCXABCABC\"", "c": "B", "current": "1", "max_len": "0"}, "explanation": "'B' не равно 'X'. Условие истинно."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "B", "current": "2", "max_len": "0"}, "explanation": "Увеличиваем current."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "2", "max_len": "0"}, "explanation": "Следующий символ 'C'."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "3", "max_len": "0"}, "explanation": "'C' не равно 'X', current растет."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "X", "current": "3", "max_len": "0"}, "explanation": "Встретили 'X'."},
+      {"line": 4, "vars": {"s": "\"ABCXABCABC\"", "c": "X", "current": "3", "max_len": "0"}, "explanation": "Условие c != 'X' ложно (False). Идем в else."},
+      {"line": 7, "vars": {"s": "\"ABCXABCABC\"", "c": "X", "current": "3", "max_len": "0"}, "explanation": "Проверяем, больше ли current (3) чем max_len (0)."},
+      {"line": 8, "vars": {"s": "\"ABCXABCABC\"", "c": "X", "current": "3", "max_len": "3"}, "explanation": "Да, 3 > 0. Обновляем максимум."},
+      {"line": 9, "vars": {"s": "\"ABCXABCABC\"", "c": "X", "current": "0", "max_len": "3"}, "explanation": "Сбрасываем текущую длину, так как серия прервалась."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "A", "current": "0", "max_len": "3"}, "explanation": "Следующий символ 'A'."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "A", "current": "1", "max_len": "3"}, "explanation": "current снова начинает расти."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "B", "current": "1", "max_len": "3"}, "explanation": "Следующий символ 'B'."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "B", "current": "2", "max_len": "3"}, "explanation": "current = 2."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "2", "max_len": "3"}, "explanation": "Следующий символ 'C'."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "3", "max_len": "3"}, "explanation": "current = 3."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "A", "current": "3", "max_len": "3"}, "explanation": "Следующий символ 'A'."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "A", "current": "4", "max_len": "3"}, "explanation": "current = 4 (превысили максимум, но пока не обновили)."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "B", "current": "4", "max_len": "3"}, "explanation": "Следующий символ 'B'."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "B", "current": "5", "max_len": "3"}, "explanation": "current = 5."},
+      {"line": 3, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "5", "max_len": "3"}, "explanation": "Последний символ 'C'."},
+      {"line": 5, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "6", "max_len": "3"}, "explanation": "current = 6. Цикл заканчивается."},
+      {"line": 10, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "6", "max_len": "3"}, "explanation": "Выходим из цикла. Проверяем, не потеряли ли последнюю серию."},
+      {"line": 11, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "6", "max_len": "6"}, "explanation": "6 > 3. Обновляем максимум перед выводом!"},
+      {"line": 12, "vars": {"s": "\"ABCXABCABC\"", "c": "C", "current": "6", "max_len": "6"}, "explanation": "Выводим результат: 6."}
+    ]
+  }
+]

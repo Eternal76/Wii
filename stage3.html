@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Этап 3 — Сборщик</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/stage.css">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+</head>
+<body>
+  <main class="page">
+    <a class="back-link" href="index.html">← На главную</a>
+    <article class="stage-page">
+      <h1>Этап 3. Сборщик</h1>
+      <h2 class="task-title" id="task-title">Загрузка…</h2>
+      <p class="lead" id="task-description"></p>
+      <p class="builder-help">Перетаскивайте блоки мышью, чтобы расставить их в правильном порядке.</p>
+
+      <ul id="sortable-list" class="sortable-list"></ul>
+
+      <div class="builder-actions">
+        <button type="button" class="btn" id="check-order">Проверить</button>
+        <button type="button" class="btn btn-secondary" id="reset-order">Сброс</button>
+      </div>
+
+      <p id="builder-message" class="builder-message" hidden></p>
+    </article>
+  </main>
+  <script src="js/app.js"></script>
+  <script src="js/stage3.js"></script>
+</body>
+</html>
