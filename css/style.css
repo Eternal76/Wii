@@ -16,6 +16,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -71,8 +75,20 @@ h1 {
 
 .stages-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .stages-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stages-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stage-card {
@@ -169,6 +185,17 @@ h1 {
 
 .btn:hover {
   filter: brightness(0.95);
+}
+
+.dev-banner {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border: 2px solid #c0392b;
+  border-radius: 10px;
+  background: #c0392b;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .home-footer {

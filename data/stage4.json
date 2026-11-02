@@ -6,5 +6,213 @@
     "buggy_code": "max_len = 0\nwith open('input.txt') as f:\n    for line in f:\n        s = line.strip()\n        cur = 0\n        for i in range(len(s) - 1):\n            if s[i] == 'A':\n                cur += 1\n                if cur > max_len:\n                    max_len = cur\n            else:\n                cur = 0\nprint(max_len)",
     "input_data": "BBBBB\nAA\nBBBB\nA\nB",
     "expected_output": "5"
+  },
+  {
+    "id": "task_2",
+    "title": "Максимальная длина подстроки из букв 'A'",
+    "description": "Программа должна найти максимальную длину непрерывной подстроки, состоящей только из букв 'A'. В условии внутри цикла есть ошибка. Запустите код и найдите её.",
+    "buggy_code": "max_len = 0\ncur = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor i in range(len(s)):\n    if s[i] != 'A':\n        cur += 1\n        if cur > max_len:\n            max_len = cur\n    else:\n        cur = 0\nprint(max_len)",
+    "input_data": "ABBAAAB",
+    "expected_output": "3"
+  },
+  {
+    "id": "task_3",
+    "title": "Подсчёт пар «согласная + гласная»",
+    "description": "Программа должна посчитать количество пар соседних символов, где первый символ — согласная, а второй — гласная (A, E, I, O, U). Условие в if записано неверно. Найдите ошибку.",
+    "buggy_code": "count = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor i in range(len(s) - 1):\n    if s[i] != 'A' and s[i+1] != 'E':\n        count += 1\nprint(count)",
+    "input_data": "BACE",
+    "expected_output": "2"
+  },
+  {
+    "id": "task_4",
+    "title": "Сумма всех цифр в строке",
+    "description": "Программа должна найти сумму всех цифр, встречающихся в строке из файла. В цикле допущена ошибка на границе диапазона. Найдите её.",
+    "buggy_code": "total = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor i in range(len(s) - 1):\n    if s[i].isdigit():\n        total += int(s[i])\nprint(total)",
+    "input_data": "A1B2C3",
+    "expected_output": "6"
+  },
+  {
+    "id": "task_5",
+    "title": "Количество групп подряд идущих одинаковых символов",
+    "description": "Программа должна посчитать, сколько в строке групп подряд идущих одинаковых символов (например, в 'AAABBB' таких групп две). В коде две ошибки: неверная инициализация счётчика и отсутствие сброса. Найдите их.",
+    "buggy_code": "count = 1\nwith open('input.txt') as f:\n    s = f.readline().strip()\nprev = None\nfor c in s:\n    if c != prev:\n        count += 1\nprint(count)",
+    "input_data": "AAABBB",
+    "expected_output": "2"
+  },
+  {
+    "id": "task_6",
+    "title": "Поиск подстроки-палиндрома длины 3",
+    "description": "Программа должна найти первую подстроку длины 3, которая читается одинаково слева направо и справа налево. В срезе допущена ошибка. Запустите код и найдите её.",
+    "buggy_code": "with open('input.txt') as f:\n    s = f.readline().strip()\nfound = \"\"\nfor i in range(len(s) - 2):\n    if s[i:i+2] == s[i:i+2][::-1]:\n        found = s[i:i+2]\n        break\nprint(found)",
+    "input_data": "AAAB",
+    "expected_output": "AAA"
+  },
+  {
+    "id": "task_7",
+    "title": "Первая половина строки",
+    "description": "Программа должна вывести первую половину строки из файла. Границы среза перепутаны местами. Найдите ошибку.",
+    "buggy_code": "with open('input.txt') as f:\n    s = f.readline().strip()\nprint(s[len(s) // 2:])",
+    "input_data": "ABCDEF",
+    "expected_output": "ABC"
+  },
+  {
+    "id": "task_8",
+    "title": "Проверка, что соседние символы различны",
+    "description": "Программа должна посчитать, сколько раз два соседних символа совпадают. При запуске возникает ошибка выхода за границу строки. Найдите её.",
+    "buggy_code": "count = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor i in range(len(s)):\n    if s[i] == s[i + 1]:\n        count += 1\nprint(count)",
+    "input_data": "AABB",
+    "expected_output": "2"
+  },
+  {
+    "id": "task_9",
+    "title": "Количество символов в строке без переноса",
+    "description": "Программа должна посчитать количество символов в первой строке файла, не учитывая невидимый символ переноса строки. Ответ получается на 1 больше нужного. Найдите ошибку.",
+    "buggy_code": "count = 0\nwith open('input.txt') as f:\n    s = f.readline()\nfor c in s:\n    count += 1\nprint(count)",
+    "input_data": "HELLO\n",
+    "expected_output": "5"
+  },
+  {
+    "id": "task_10",
+    "title": "Вывод только первой строки файла",
+    "description": "Программа должна вывести первую строку файла в верхнем регистре. Вместо одной строки выводятся отдельные символы, потому что выбран неверный метод чтения. Найдите ошибку.",
+    "buggy_code": "with open('input.txt') as f:\n    for line in f.read():\n        print(line.upper())",
+    "input_data": "hello\nworld",
+    "expected_output": "HELLO"
+  },
+  {
+    "id": "task_11",
+    "title": "Вывод содержимого файла",
+    "description": "Программа должна вывести все строки файла. При запуске возникает ошибка работы с закрытым файлом. Найдите ошибку.",
+    "buggy_code": "with open('input.txt') as f:\n    f.close()\n    for line in f:\n        print(line.strip())",
+    "input_data": "one\ntwo",
+    "expected_output": "one\ntwo"
+  },
+  {
+    "id": "task_12",
+    "title": "Максимальная длина серии подряд идущих цифр",
+    "description": "Программа должна найти максимальную длину непрерывной последовательности цифр в строке из файла. В коде две ошибки: цикл не доходит до последнего символа, и строка читается без strip(). Найдите их.",
+    "buggy_code": "max_len = 0\ncur = 0\nwith open('input.txt') as f:\n    s = f.readline()\nfor i in range(len(s) - 1):\n    if s[i].isdigit():\n        cur += 1\n        if cur > max_len:\n            max_len = cur\n    else:\n        cur = 0\nprint(max_len)",
+    "input_data": "ab12c3456",
+    "expected_output": "4"
+  },
+  {
+    "id": "task_13",
+    "title": "Проверка наличия подстроки 'AB'",
+    "description": "Программа должна вывести YES, если в строке есть подстрока 'AB', и NO в противном случае. В условии две ошибки: неверная длина среза и связка or вместо and. Найдите их.",
+    "buggy_code": "found = False\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor i in range(len(s) - 1):\n    if s[i:i+1] == \"A\" or s[i+1:i+2] == \"B\":\n        found = True\n        break\nprint(\"YES\" if found else \"NO\")",
+    "input_data": "ACB",
+    "expected_output": "NO"
+  },
+  {
+    "id": "task_14",
+    "title": "Максимальная серия одинаковых символов",
+    "description": "Программа должна найти максимальную длину серии подряд идущих одинаковых символов. В коде две ошибки: сброс счётчика на 0 вместо 1 и обновление максимума только внутри else (серия в конце строки теряется). Найдите их.",
+    "buggy_code": "max_len = 0\ncur = 1\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor i in range(1, len(s)):\n    if s[i] == s[i-1]:\n        cur += 1\n    else:\n        if cur > max_len:\n            max_len = cur\n        cur = 0\nprint(max_len)",
+    "input_data": "AABBB",
+    "expected_output": "3"
+  },
+  {
+    "id": "task_15",
+    "title": "Количество чётных чисел в файле",
+    "description": "Программа должна посчитать количество чётных чисел в файле. Ошибка: return стоит внутри цикла, поэтому функция завершается после первого числа. Найдите её.",
+    "buggy_code": "def count_even(numbers):\n    count = 0\n    for n in numbers:\n        if n % 2 == 0:\n            count += 1\n        return count\n\nwith open('input.txt') as f:\n    nums = list(map(int, f.read().split()))\nprint(count_even(nums))",
+    "input_data": "2 3 4 5 6",
+    "expected_output": "3"
+  },
+  {
+    "id": "task_16",
+    "title": "Максимальное число в файле",
+    "description": "Программа должна найти максимальное число в файле. Ошибка: максимум инициализируется значением 1000, поэтому для чисел меньше 1000 программа выдаёт именно его. Найдите ошибку.",
+    "buggy_code": "with open('input.txt') as f:\n    nums = list(map(int, f.read().split()))\nmax_num = 1000\nfor n in nums:\n    if n > max_num:\n        max_num = n\nprint(max_num)",
+    "input_data": "5 12 7",
+    "expected_output": "12"
+  },
+  {
+    "id": "task_17",
+    "title": "Сбор строки из заглавных букв",
+    "description": "Программа должна собрать в новую строку все заглавные буквы из строки файла. Ошибка: накопитель работает с числами, поэтому вместо строки получается их количество. Найдите ошибку.",
+    "buggy_code": "current = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor c in s:\n    if c.isupper():\n        current += 1\nprint(current)",
+    "input_data": "aBcDe",
+    "expected_output": "BD"
+  },
+  {
+    "id": "task_18",
+    "title": "Самая длинная подстрока без повторов",
+    "description": "Программа должна найти длину самой длинной подстроки без повторяющихся символов. Ошибка: сдвиг left += 1 оказался вне цикла while, поэтому окно никогда не расширяется. Найдите её.",
+    "buggy_code": "max_len = 0\nleft = 0\ncount = {}\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor right in range(len(s)):\n    count[s[right]] = count.get(s[right], 0) + 1\n    while count[s[right]] > 1:\n        break\n    left += 1\n    max_len = max(max_len, right - left + 1)\nprint(max_len)",
+    "input_data": "ABCBD",
+    "expected_output": "3"
+  },
+  {
+    "id": "task_19",
+    "title": "Окно с не более чем двумя 'A'",
+    "description": "Программа должна найти максимальную длину подстроки, в которой буква 'A' встречается не более 2 раз. Ошибка: при сжатии окна left прыгает сразу на right вместо left += 1. Найдите её.",
+    "buggy_code": "max_len = 0\ncount_a = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nleft = 0\nfor right in range(len(s)):\n    if s[right] == 'A':\n        count_a += 1\n    while count_a > 2:\n        if s[left] == 'A':\n            count_a -= 1\n        left = right\n    max_len = max(max_len, right - left + 1)\nprint(max_len)",
+    "input_data": "AAABAAAA",
+    "expected_output": "3"
+  },
+  {
+    "id": "task_20",
+    "title": "Подстрока с уникальными символами",
+    "description": "Программа должна найти максимальную длину подстроки из уникальных символов. Ошибка: при сдвиге left символ не удаляется из множества window, поэтому предыдущие символы мешают. Найдите её.",
+    "buggy_code": "max_len = 0\nwindow = set()\nwith open('input.txt') as f:\n    s = f.readline().strip()\nleft = 0\nfor right in range(len(s)):\n    while s[right] in window and left <= right:\n        left += 1\n    window.add(s[right])\n    max_len = max(max_len, right - left + 1)\nprint(max_len)",
+    "input_data": "ABAC",
+    "expected_output": "3"
+  },
+  {
+    "id": "task_21",
+    "title": "Минимальная подстрока с 'A' и 'B'",
+    "description": "Программа должна найти минимальную длину подстроки, содержащей и 'A', и 'B'. Ошибка: min_len обновляется до сжатия окна, поэтому берётся невалидная длина. Найдите её.",
+    "buggy_code": "min_len = float('inf')\ncount_a = 0\ncount_b = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nleft = 0\nfor right in range(len(s)):\n    if s[right] == 'A':\n        count_a += 1\n    elif s[right] == 'B':\n        count_b += 1\n    min_len = min(min_len, right - left + 1)\n    while count_a > 0 and count_b > 0:\n        if s[left] == 'A':\n            count_a -= 1\n        elif s[left] == 'B':\n            count_b -= 1\n        left += 1\nprint(min_len)",
+    "input_data": "AB",
+    "expected_output": "2"
+  },
+  {
+    "id": "task_22",
+    "title": "Подстроки с не более чем 3 разными символами",
+    "description": "Программа должна посчитать количество подстрок, в которых не более 3 разных символов. Ошибка: вместо while стоит if, поэтому окно сжимается только на один шаг и условие не восстанавливается. Найдите её.",
+    "buggy_code": "cnt = {}\nleft = 0\ntotal = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor right in range(len(s)):\n    ch = s[right]\n    cnt[ch] = cnt.get(ch, 0) + 1\n    if len(cnt) > 3:\n        if cnt[s[left]] == 1:\n            del cnt[s[left]]\n        else:\n            cnt[s[left]] -= 1\n        left += 1\n    total += right - left + 1\nprint(total)",
+    "input_data": "AABCD",
+    "expected_output": "13"
+  },
+  {
+    "id": "task_23",
+    "title": "Окно с не более чем двумя 'A' (обновление ответа)",
+    "description": "Программа должна найти максимальную длину подстроки с не более чем двумя 'A'. Ошибка: max_len обновляется только в блоке else (при сжатии), поэтому валидное окно в конце строки теряется. Найдите её.",
+    "buggy_code": "max_len = 0\nleft = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor right in range(len(s)):\n    if s[left:right+1].count('A') <= 2:\n        pass\n    else:\n        while s[left:right+1].count('A') > 2:\n            left += 1\n        max_len = max(max_len, right - left + 1)\nprint(max_len)",
+    "input_data": "AAABBB",
+    "expected_output": "5"
+  },
+  {
+    "id": "task_24",
+    "title": "Количество строк, начинающихся с 'X'",
+    "description": "Программа должна посчитать количество строк файла, начинающихся с буквы 'X'. Ошибка: return count стоит до цикла, поэтому функция всегда возвращает 0. Найдите её.",
+    "buggy_code": "def count_lines(lines):\n    count = 0\n    return count\n    for line in lines:\n        if line.startswith('X'):\n            count += 1\n    return count\n\nwith open('input.txt') as f:\n    lines = f.read().splitlines()\nprint(count_lines(lines))",
+    "input_data": "X1\nY2\nX3",
+    "expected_output": "2"
+  },
+  {
+    "id": "task_25",
+    "title": "Подсчёт цифр и гласных",
+    "description": "Программа должна посчитать количество символов, которые являются цифрами или гласными буквами. Ошибка: цифра не может быть гласной, поэтому условие с and никогда не срабатывает. Найдите её.",
+    "buggy_code": "count = 0\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor c in s:\n    if c.isdigit() and c in 'AEIOU':\n        count += 1\nprint(count)",
+    "input_data": "A1B2",
+    "expected_output": "3"
+  },
+  {
+    "id": "task_26",
+    "title": "Разворот строки",
+    "description": "Программа должна вывести строку в обратном порядке. Ошибка: срез с шагом 2 берёт каждый второй символ, а не разворачивает строку. Найдите её.",
+    "buggy_code": "with open('input.txt') as f:\n    s = f.readline().strip()\nprint(s[::2])",
+    "input_data": "ABCDE",
+    "expected_output": "EDCBA"
+  },
+  {
+    "id": "task_27",
+    "title": "Максимальная серия одинаковых цифр",
+    "description": "Программа должна найти максимальную длину серии подряд идущих одинаковых цифр. В коде две ошибки: счётчик сбрасывается в 1 до сравнения с максимумом и отсутствует финальная проверка после цикла. Найдите их.",
+    "buggy_code": "max_len = 0\ncur = 1\nwith open('input.txt') as f:\n    s = f.readline().strip()\nfor i in range(1, len(s)):\n    if s[i] == s[i-1]:\n        cur += 1\n    else:\n        cur = 1\n        if cur > max_len:\n            max_len = cur\nprint(max_len)",
+    "input_data": "112233",
+    "expected_output": "2"
   }
 ]

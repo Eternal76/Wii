@@ -1,7 +1,9 @@
 (function () {
-  // Текущая анимация (первый элемент массива) и индекс активного шага.
+  // Случайно выбранная анимация и индекс активного шага.
   var animation = null;
   var currentIndex = 0;
+  // Этап засчитывается один раз, когда анимация пройдена до конца.
+  var stageMarked = false;
 
   function escapeHtml(value) {
     return String(value)
@@ -104,7 +106,13 @@
     if (isLastStep()) {
       stepBtn.disabled = true;
       finishBtn.hidden = false;
-      showStatus("Все шаги пройдены. Нажмите «Этап пройден!».", "pass");
+      showStatus("Анимация разобрана до конца. Можно взять другой сценарий.", "pass");
+      if (!stageMarked) {
+        stageMarked = true;
+        if (typeof markStageCompleted === "function") {
+          markStageCompleted(2);
+        }
+      }
     } else {
       stepBtn.disabled = false;
       finishBtn.hidden = true;
@@ -133,24 +141,19 @@
     updateButtons();
   }
 
-  function finishStage() {
-    showStatus("Этап пройден!", "pass");
-    if (typeof markStageCompleted === "function") {
-      markStageCompleted(2);
-    }
-    window.setTimeout(function () {
-      window.location.href = "index.html";
-    }, 1200);
+  // Перезагрузка страницы — при загрузке выберется новый случайный сценарий.
+  function showAnotherAnimation() {
+    window.location.reload();
   }
 
   function bindEvents() {
     document.getElementById("step-forward").addEventListener("click", stepForward);
     document.getElementById("anim-reset").addEventListener("click", resetAnimation);
-    document.getElementById("anim-finish").addEventListener("click", finishStage);
+    document.getElementById("anim-finish").addEventListener("click", showAnotherAnimation);
   }
 
   function loadAnimation() {
-    fetch("data/animations.json")
+    fetch("data/stage2.json")
       .then(function (response) {
         if (!response.ok) {
           throw new Error("Не удалось загрузить анимацию");
@@ -158,10 +161,12 @@
         return response.json();
       })
       .then(function (data) {
-        animation = Array.isArray(data) ? data[0] : data;
-        if (!animation) {
+        var list = Array.isArray(data) ? data : [data];
+        if (!list.length) {
           throw new Error("Пустой файл анимаций");
         }
+        // Случайный сценарий, чтобы этап можно было проходить многократно.
+        animation = list[Math.floor(Math.random() * list.length)];
         renderTitle(animation.title);
         renderCode(animation.code);
         resetAnimation();

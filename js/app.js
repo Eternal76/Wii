@@ -1,13 +1,19 @@
 (function () {
   var STORAGE_KEY = "ege24_trainer_progress";
-  var STAGE_COUNT = 5;
+  var STAGE_COUNT = 6;
   var STAGES = [
+    { number: 0, title: "Обозначения", href: "stage0.html" },
     { number: 1, title: "Синтаксис", href: "stage1.html" },
     { number: 2, title: "Анимация", href: "stage2.html" },
     { number: 3, title: "Сборщик", href: "stage3.html" },
     { number: 4, title: "Отладчик", href: "stage4.html" },
     { number: 5, title: "Самостоятельное написание", href: "stage5.html" }
   ];
+
+  // Режим разработчика включается только через ссылку: ?dev=true
+  function isDevMode() {
+    return new URLSearchParams(window.location.search).get("dev") === "true";
+  }
 
   function getProgress() {
     try {
@@ -38,7 +44,10 @@
   }
 
   function isStageAvailable(stageNumber) {
-    if (stageNumber === 1) {
+    if (isDevMode()) {
+      return true;
+    }
+    if (stageNumber === 0) {
       return true;
     }
     return isStageCompleted(stageNumber - 1);
@@ -56,8 +65,8 @@
 
   function countCompleted() {
     var n = 0;
-    for (var i = 1; i <= STAGE_COUNT; i += 1) {
-      if (isStageCompleted(i)) {
+    for (var i = 0; i < STAGES.length; i += 1) {
+      if (isStageCompleted(STAGES[i].number)) {
         n += 1;
       }
     }
@@ -141,6 +150,14 @@
     grid.innerHTML = html;
   }
 
+  function renderDevBanner() {
+    var banner = document.getElementById("dev-banner");
+    if (!banner) {
+      return;
+    }
+    banner.hidden = !isDevMode();
+  }
+
   function resetProgress() {
     if (!window.confirm("Вы уверены, что хотите сбросить весь прогресс?")) {
       return;
@@ -160,8 +177,10 @@
   window.markStageCompleted = markStageCompleted;
   window.isStageAvailable = isStageAvailable;
   window.getStageStatus = getStageStatus;
+  window.isDevMode = isDevMode;
 
   document.addEventListener("DOMContentLoaded", function () {
+    renderDevBanner();
     renderHome();
     bindResetButton();
   });

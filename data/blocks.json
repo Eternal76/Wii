@@ -17,5 +17,346 @@
       "Счётчик должен 'расти' с каждым подходящим символом. Верни его внутрь цикла.",
       "Начни с cur_len = 1. В цикле сравнивай s[i] и s[i-1]."
     ]
+  },
+  {
+    "id": "task_2",
+    "title": "Подсчёт количества гласных букв",
+    "description": "Собери программу, которая считает, сколько гласных букв (A, E, I, O, U) встречается в строке из файла.",
+    "correct_order": ["c1", "c2", "c3", "c4", "c5"],
+    "blocks": [
+      {"id": "c3", "text": "for c in s:"},
+      {"id": "c6", "text": "count = 1"},
+      {"id": "c1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "c8", "text": "    if c == \"AEIOU\":\n        count += 1"},
+      {"id": "c4", "text": "    if c in \"AEIOU\":\n        count += 1"},
+      {"id": "c2", "text": "count = 0"},
+      {"id": "c7", "text": "for c in s:\n    print(count)"},
+      {"id": "c5", "text": "print(count)"}
+    ],
+    "hints": [
+      "Сначала нужно прочитать строку из файла и убрать перенос строки — иначе сравнивать придётся не с теми символами.",
+      "Счётчик должен начинаться с нуля: если поставить 1, ответ всегда будет на единицу больше.",
+      "Проверяй вхождение символа в набор: c in \"AEIOU\". Сравнение c == \"AEIOU\" не сработает никогда."
+    ]
+  },
+  {
+    "id": "task_3",
+    "title": "Накопление строки: только заглавные буквы",
+    "description": "Собери программу, которая собирает в новую строку только заглавные буквы из прочитанной строки, пропуская цифры и строчные буквы.",
+    "correct_order": ["d1", "d2", "d3", "d4", "d5"],
+    "blocks": [
+      {"id": "d4", "text": "    if c.isupper():\n        result += c"},
+      {"id": "d1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "d7", "text": "    if c.isupper():\n        result += 1"},
+      {"id": "d3", "text": "for c in s:"},
+      {"id": "d5", "text": "print(result)"},
+      {"id": "d6", "text": "result = 0"},
+      {"id": "d2", "text": "result = \"\""},
+      {"id": "d8", "text": "    if c.isdigit():\n        result += c"}
+    ],
+    "hints": [
+      "Результат — это строка, поэтому начинать нужно с пустой строки \"\", а не с числа 0.",
+      "Цифры пропускаем, добавляем только заглавные буквы: проверь, какой метод строки за это отвечает.",
+      "К результату приклеивается сам символ: result += c. Вариант result += 1 вызовет ошибку."
+    ]
+  },
+  {
+    "id": "task_4",
+    "title": "Плавающее окно: максимальный отрезок без буквы 'A'",
+    "description": "Собери программу, которая находит максимальную длину подряд идущих символов, среди которых нет буквы 'A'.",
+    "correct_order": ["e1", "e2", "e3", "e4", "e5", "e6"],
+    "blocks": [
+      {"id": "e3", "text": "for right in range(len(s)):"},
+      {"id": "e5", "text": "    else:\n        max_len = max(max_len, right - left + 1)"},
+      {"id": "e1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "e7", "text": "    if s[right] == 'A':\n        max_len = max(max_len, right - left + 1)"},
+      {"id": "e2", "text": "max_len = 0\nleft = 0"},
+      {"id": "e8", "text": "        left = right"},
+      {"id": "e6", "text": "print(max_len)"},
+      {"id": "e4", "text": "    if s[right] == 'A':\n        left = right + 1"}
+    ],
+    "hints": [
+      "Правая граница right просто идёт по строке, а левая left сдвигается только при встрече с 'A'.",
+      "Длину окна считаем в ветке else: если символ не 'A', отрезок можно продолжить. Обновлять максимум в ветке с 'A' нельзя.",
+      "Формула длины отрезка: right - left + 1. И не забудь перепрыгнуть саму букву 'A': left = right + 1."
+    ]
+  },
+  {
+    "id": "task_5",
+    "title": "Функция проверки символа и её вызов в цикле",
+    "description": "Собери программу с функцией is_digit, которая возвращает True для цифры, и подсчитай с её помощью количество цифр в строке из файла.",
+    "correct_order": ["g1", "g2", "g3", "g4", "g5"],
+    "blocks": [
+      {"id": "g4", "text": "for c in s:\n    if is_digit(c):\n        count += 1"},
+      {"id": "g2", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "g6", "text": "def is_digit(c):\n    print(c.isdigit())"},
+      {"id": "g1", "text": "def is_digit(c):\n    return c.isdigit()"},
+      {"id": "g8", "text": "for c in s:\n    if is_digit:\n        count += 1"},
+      {"id": "g3", "text": "count = 0"},
+      {"id": "g7", "text": "def is_digit(c):\n    return c.isupper()"},
+      {"id": "g5", "text": "print(count)"}
+    ],
+    "hints": [
+      "Функция должна отдавать результат наружу через return. Если внутри только print, то условие получит None и всегда будет ложным.",
+      "Функцию объявляют до того, как её вызывают, — блок с def должен идти раньше цикла.",
+      "В условии нужен именно вызов: is_digit(c). Без скобок в условие попадёт сама функция, а это всегда истина."
+    ]
+  },
+  {
+    "id": "task_11",
+    "title": "Самая длинная строка в файле",
+    "description": "Собери программу, которая находит самую длинную строку в файле и выводит её.",
+    "correct_order": ["h1", "h2", "h3", "h4", "h5"],
+    "blocks": [
+      {"id": "h4", "text": "    if len(line) > len(longest):\n        longest = line"},
+      {"id": "h1", "text": "f = open(\"input.txt\")\nlines = f.readlines()\nf.close()"},
+      {"id": "h7", "text": "longest = 0"},
+      {"id": "h3", "text": "for line in lines:\n    line = line.strip()"},
+      {"id": "h5", "text": "print(longest)"},
+      {"id": "h8", "text": "    if line > longest:\n        longest = line"},
+      {"id": "h2", "text": "longest = \"\""},
+      {"id": "h6", "text": "    print(line)"}
+    ],
+    "hints": [
+      "Файл удобно прочитать целиком через readlines(), а затем перебирать строки циклом.",
+      "Храни саму строку, а не её длину: переменная longest — это строка, поэтому начинать нужно с пустой строки \"\".",
+      "Сравнивать нужно длины (len(line) > len(longest)), а печатать — один раз после цикла, а не внутри него."
+    ]
+  },
+  {
+    "id": "task_12",
+    "title": "Строки, начинающиеся с буквы 'A'",
+    "description": "Собери программу, которая считает, сколько строк в файле начинается с заглавной буквы 'A'.",
+    "correct_order": ["i1", "i2", "i3", "i4", "i5"],
+    "blocks": [
+      {"id": "i3", "text": "for line in lines:"},
+      {"id": "i1", "text": "f = open(\"input.txt\")\nlines = f.readlines()\nf.close()"},
+      {"id": "i6", "text": "    if \"A\" in line:\n        count += 1"},
+      {"id": "i4", "text": "    if line.startswith(\"A\"):\n        count += 1"},
+      {"id": "i8", "text": "    if line.startswith(\"a\"):\n        count += 1"},
+      {"id": "i2", "text": "count = 0"},
+      {"id": "i7", "text": "    count = 0"},
+      {"id": "i5", "text": "print(count)"}
+    ],
+    "hints": [
+      "Сначала прочитай строки из файла, заведи счётчик равным нулю и только потом начинай цикл.",
+      "Нужно проверять именно начало строки: помогает метод startswith(\"A\"). Проверка \"A\" in line найдёт букву где угодно.",
+      "Счётчик увеличивается внутри условия один раз за строку. Обнулять его внутри цикла нельзя — результат всегда будет 0 или 1."
+    ]
+  },
+  {
+    "id": "task_13",
+    "title": "Максимальная длина цепочки одинаковых символов",
+    "description": "Собери программу, которая находит максимальную длину подряд идущих одинаковых символов, включая проверку последней цепочки после цикла.",
+    "correct_order": ["j1", "j2", "j3", "j4", "j5", "j6"],
+    "blocks": [
+      {"id": "j3", "text": "for i in range(1, len(s)):"},
+      {"id": "j5", "text": "if cur_len > max_len:\n    max_len = cur_len"},
+      {"id": "j8", "text": "for i in range(len(s)):"},
+      {"id": "j2", "text": "max_len = 0\ncur_len = 1"},
+      {"id": "j6", "text": "print(max_len)"},
+      {"id": "j9", "text": "cur_len = 1\nif cur_len > max_len:\n    max_len = cur_len"},
+      {"id": "j1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "j4", "text": "    if s[i] == s[i-1]:\n        cur_len += 1\n    else:\n        if cur_len > max_len:\n            max_len = cur_len\n        cur_len = 1"},
+      {"id": "j7", "text": "max_len = 0\ncur_len = 0"}
+    ],
+    "hints": [
+      "Первая строка сравнивается со второй, поэтому цикл идёт по range(1, len(s)) — с единицы, а не с нуля.",
+      "cur_len — длина текущей цепочки, и первый символ уже в неё входит, значит стартовать нужно с 1, а не с 0.",
+      "После цикла последняя цепочка остаётся необработанной: сравни её с max_len отдельным if и только потом печатай."
+    ]
+  },
+  {
+    "id": "task_14",
+    "title": "Сколько раз встречается максимальное число",
+    "description": "Числа записаны в файле через пробел. Собери программу, которая считает, сколько раз среди них встречается максимальное число.",
+    "correct_order": ["k1", "k2", "k3", "k4", "k5"],
+    "blocks": [
+      {"id": "k4", "text": "for n in nums:\n    if n == maximum:\n        count += 1"},
+      {"id": "k1", "text": "f = open(\"input.txt\")\nnums = list(map(int, f.read().split()))\nf.close()"},
+      {"id": "k6", "text": "maximum = 0"},
+      {"id": "k3", "text": "count = 0"},
+      {"id": "k8", "text": "print(max(nums))"},
+      {"id": "k2", "text": "maximum = max(nums)"},
+      {"id": "k7", "text": "nums = f.read().split()"},
+      {"id": "k5", "text": "print(count)"}
+    ],
+    "hints": [
+      "split() даёт строки, а не числа: преврати их через map(int, ...), иначе max() сравнит числа по алфавиту.",
+      "Максимум вычисляется один раз и сохраняется в переменную maximum. Ставить maximum = 0 нельзя — в данных может не быть нуля.",
+      "Ответ — это количество вхождений, а не само максимальное число: увеличивай счётчик и печатай именно его."
+    ]
+  },
+  {
+    "id": "task_15",
+    "title": "Собрать строку из всех цифр текста",
+    "description": "Собери программу, которая собирает в новую строку все цифры, встречающиеся в тексте файла.",
+    "correct_order": ["l1", "l2", "l3", "l4", "l5"],
+    "blocks": [
+      {"id": "l3", "text": "for c in s:"},
+      {"id": "l6", "text": "    if c.isdigit():\n        digits += 1"},
+      {"id": "l1", "text": "f = open(\"input.txt\")\ns = f.read()\nf.close()"},
+      {"id": "l2", "text": "digits = \"\""},
+      {"id": "l8", "text": "digits = 0"},
+      {"id": "l5", "text": "print(digits)"},
+      {"id": "l7", "text": "    if c.isalpha():\n        digits += c"},
+      {"id": "l4", "text": "    if c.isdigit():\n        digits += c"}
+    ],
+    "hints": [
+      "Результат — строка, поэтому накопитель начинается с пустой строки \"\", а не с числа 0.",
+      "Символ является цифрой, если c.isdigit() истинно. Метод isalpha() проверяет буквы — это не то.",
+      "К накопителю приклеивается сам символ: digits += c. При digits += 1 будет ошибка типов."
+    ]
+  },
+  {
+    "id": "task_16",
+    "title": "Оставить в строке только гласные буквы",
+    "description": "Собери программу, которая собирает новую строку только из гласных букв исходной строки, а остальные символы пропускает.",
+    "correct_order": ["m1", "m2", "m3", "m4", "m5"],
+    "blocks": [
+      {"id": "m3", "text": "for c in s:"},
+      {"id": "m1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "m7", "text": "    if c == \"A\" and c == \"E\":\n        vowels += c"},
+      {"id": "m4", "text": "    if c in \"AEIOUaeiou\":\n        vowels += c"},
+      {"id": "m6", "text": "    if c in \"AEIOUaeiou\":\n        vowels += c\n    else:\n        vowels = \"\""},
+      {"id": "m2", "text": "vowels = \"\""},
+      {"id": "m8", "text": "    if c not in \"AEIOUaeiou\":\n        vowels += c"},
+      {"id": "m5", "text": "print(vowels)"}
+    ],
+    "hints": [
+      "Накопитель для гласных — отдельная строка, которая начинается пустой.",
+      "Достаточно одной проверки: c in \"AEIOUaeiou\". Условие через and (например, c == \"A\" and c == \"E\") не выполнится никогда.",
+      "Не очищай накопитель в else: тогда в ответе останутся только последние подряд идущие гласные вместо всех."
+    ]
+  },
+  {
+    "id": "task_17",
+    "title": "Максимальная подстрока без повторяющихся символов",
+    "description": "Собери программу, которая находит максимальную длину подстроки, в которой все символы различны.",
+    "correct_order": ["n1", "n2", "n3", "n4", "n5", "n6", "n7"],
+    "blocks": [
+      {"id": "n3", "text": "for right in range(len(s)):"},
+      {"id": "n6", "text": "    max_len = max(max_len, right - left + 1)"},
+      {"id": "n9", "text": "    while s[right] in seen:\n        left += 1"},
+      {"id": "n1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "n5", "text": "    seen.add(s[right])"},
+      {"id": "n2", "text": "seen = set()\nleft = 0\nmax_len = 0"},
+      {"id": "n10", "text": "    max_len = max_len + 1"},
+      {"id": "n7", "text": "print(max_len)"},
+      {"id": "n4", "text": "    while s[right] in seen:\n        seen.remove(s[left])\n        left += 1"},
+      {"id": "n8", "text": "    while s[right] in seen:\n        seen.remove(s[left])\n        left = right"}
+    ],
+    "hints": [
+      "Правое окно расширяем всегда: right идёт по всей строке, а left двигается только при повторе.",
+      "Когда символ уже есть в окне, нужно не только сдвинуть left, но и убрать уходящий символ из set: seen.remove(s[left]).",
+      "Длину окна считай после добавления символа — формула right - left + 1."
+    ]
+  },
+  {
+    "id": "task_18",
+    "title": "Подстрока с буквой 'A' не более двух раз",
+    "description": "Собери программу, которая находит максимальную длину подстроки, в которой буква 'A' встречается не более двух раз.",
+    "correct_order": ["o1", "o2", "o3", "o4", "o5", "o6"],
+    "blocks": [
+      {"id": "o3", "text": "for right in range(len(s)):\n    if s[right] == 'A':\n        count_a += 1"},
+      {"id": "o1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "o7", "text": "    while count_a > 2:\n        count_a -= 1\n        left += 1"},
+      {"id": "o5", "text": "    max_len = max(max_len, right - left + 1)"},
+      {"id": "o2", "text": "left = 0\nmax_len = 0\ncount_a = 0"},
+      {"id": "o9", "text": "    while count_a >= 2:\n        if s[left] == 'A':\n            count_a -= 1\n        left += 1"},
+      {"id": "o6", "text": "print(max_len)"},
+      {"id": "o8", "text": "    max_len = max(max_len, right - left + 1)\n    while count_a > 2:\n        if s[left] == 'A':\n            count_a -= 1\n        left += 1"},
+      {"id": "o4", "text": "    while count_a > 2:\n        if s[left] == 'A':\n            count_a -= 1\n        left += 1"}
+    ],
+    "hints": [
+      "Сначала посчитай, сколько раз 'A' попалась в окно, и только потом проверяй, не превышен ли лимит 2.",
+      "Сжимая окно, уменьшай счётчик только если уходит именно 'A', и делай это до сдвига left.",
+      "Максимум обновляй после сжатия окна — иначе посчитаешь окно, которое ещё не стало корректным."
+    ]
+  },
+  {
+    "id": "task_19",
+    "title": "Минимальная подстрока со всеми буквами от 'A' до 'C'",
+    "description": "Собери программу, которая находит минимальную длину подстроки, содержащей все три буквы A, B и C. Если такой подстроки нет, вывести 0.",
+    "correct_order": ["p1", "p2", "p3", "p4", "p5"],
+    "blocks": [
+      {"id": "p3", "text": "for right in range(len(s)):\n    window = s[left:right+1]"},
+      {"id": "p1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "p7", "text": "        min_len = length"},
+      {"id": "p4", "text": "    while 'A' in window and 'B' in window and 'C' in window:\n        length = right - left + 1\n        if length < min_len:\n            min_len = length\n        left += 1\n        window = s[left:right+1]"},
+      {"id": "p2", "text": "left = 0\nmin_len = len(s) + 1"},
+      {"id": "p6", "text": "    if 'A' in window and 'B' in window and 'C' in window:\n        length = right - left + 1\n        left += 1\n        window = s[left:right+1]"},
+      {"id": "p5", "text": "print(min_len if min_len <= len(s) else 0)"},
+      {"id": "p8", "text": "min_len = 0"}
+    ],
+    "hints": [
+      "Левую границу можно сдвигать несколько раз подряд, поэтому проверку условия делай в while, а не в if.",
+      "Найдя подходящее окно, сравнивай его длину с текущим минимумом и только потом двигай left.",
+      "Минимум нельзя начинать с нуля: возьми заведомо большое значение, например len(s) + 1."
+    ]
+  },
+  {
+    "id": "task_20",
+    "title": "Окна длины 3 ровно с двумя гласными",
+    "description": "Собери программу, которая считает, сколько подстрок длины 3 содержат ровно две гласные буквы.",
+    "correct_order": ["q1", "q2", "q3", "q4", "q5", "q6"],
+    "blocks": [
+      {"id": "q3", "text": "for i in range(len(s) - 2):\n    window = s[i:i+3]"},
+      {"id": "q5", "text": "    if vowels == 2:\n        count += 1"},
+      {"id": "q8", "text": "    if window[0] in \"AEIOUaeiou\":\n        vowels += 1"},
+      {"id": "q1", "text": "f = open(\"input.txt\")\ns = f.readline().strip()\nf.close()"},
+      {"id": "q4", "text": "    vowels = 0\n    for c in window:\n        if c in \"AEIOUaeiou\":\n            vowels += 1"},
+      {"id": "q6", "text": "print(count)"},
+      {"id": "q2", "text": "count = 0"},
+      {"id": "q9", "text": "    if vowels >= 2:\n        count += 1"},
+      {"id": "q7", "text": "for i in range(len(s)):\n    window = s[i:i+3]"}
+    ],
+    "hints": [
+      "Окно длины 3 не может начинаться у самого конца строки: цикл идёт до len(s) - 2.",
+      "Считать гласные нужно во всех трёх символах окна, а не только в первом.",
+      "Нужно ровно две гласные: условие vowels == 2, а не >= 2."
+    ]
+  },
+  {
+    "id": "task_21",
+    "title": "Функция is_palindrome и подсчёт палиндромов",
+    "description": "Собери программу с функцией is_palindrome(s), которая возвращает True или False, и подсчитай с её помощью количество строк-палиндромов в файле.",
+    "correct_order": ["r1", "r2", "r3", "r4", "r5"],
+    "blocks": [
+      {"id": "r4", "text": "for line in lines:\n    if is_palindrome(line.strip()):\n        count += 1"},
+      {"id": "r2", "text": "f = open(\"input.txt\")\nlines = f.readlines()\nf.close()"},
+      {"id": "r7", "text": "def is_palindrome(s):\n    print(s == s[::-1])"},
+      {"id": "r1", "text": "def is_palindrome(s):\n    return s == s[::-1]"},
+      {"id": "r8", "text": "for line in lines:\n    if is_palindrome(line):\n        count += 1"},
+      {"id": "r3", "text": "count = 0"},
+      {"id": "r6", "text": "def is_palindrome(s):\n    for c in s:\n        return s == s[::-1]"},
+      {"id": "r5", "text": "print(count)"}
+    ],
+    "hints": [
+      "Функция должна один раз вернуть результат через return. Если поставить return внутрь цикла, он сработает на первой же букве.",
+      "Функцию объявляют до её вызова — блок с def идёт первым.",
+      "Строка из файла приходит с символом переноса, поэтому перед проверкой нужен strip()."
+    ]
+  },
+  {
+    "id": "task_22",
+    "title": "Функция суммы цифр и число с максимальной суммой",
+    "description": "Собери программу с функцией digit_sum(n), которая считает сумму цифр числа, и найди число с самой большой суммой цифр.",
+    "correct_order": ["s1", "s2", "s3", "s4", "s5"],
+    "blocks": [
+      {"id": "s4", "text": "for n in nums:\n    if digit_sum(n) > digit_sum(best):\n        best = n"},
+      {"id": "s2", "text": "f = open(\"input.txt\")\nnums = list(map(int, f.read().split()))\nf.close()"},
+      {"id": "s8", "text": "for n in nums:\n    if digit_sum(n) > best:\n        best = n"},
+      {"id": "s1", "text": "def digit_sum(n):\n    total = 0\n    while n > 0:\n        total += n % 10\n        n = n // 10\n    return total"},
+      {"id": "s6", "text": "def digit_sum(n):\n    total = 0\n    while n > 0:\n        total += n % 10\n        n = n // 10\n    return str(total)"},
+      {"id": "s3", "text": "best = nums[0]"},
+      {"id": "s7", "text": "for n in nums:\n    if digit_sum(n) > digit_sum(best):\n        best = n\n\ndef digit_sum(n):\n    total = 0\n    while n > 0:\n        total += n % 10\n        n = n // 10\n    return total"},
+      {"id": "s5", "text": "print(best)"}
+    ],
+    "hints": [
+      "Функцию объявляют до того, как её вызовут: блок с def должен идти раньше цикла поиска.",
+      "Функция должна вернуть именно число. Возврат строки через str(total) сломает сравнение сумм.",
+      "Сравнивай сумму цифр кандидата с суммой цифр лучшего числа, а не само число с суммой."
+    ]
   }
 ]

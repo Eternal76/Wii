@@ -2,6 +2,14 @@
   var editor = null;
   var task = null;
   var hints = [];
+  var solved = false;
+
+  function showNextButton() {
+    var button = document.getElementById("next-task");
+    if (button) {
+      button.hidden = false;
+    }
+  }
 
   function setOutput(text, kind) {
     var el = document.getElementById("output-area");
@@ -61,9 +69,13 @@
         var expected = String(task.expected_output).replace(/\s+$/, "");
         if (got.trim() === expected.trim()) {
           setOutput((got ? got + "\n\n" : "") + "Верно! Задача решена", "ok");
-          if (typeof markStageCompleted === "function") {
-            markStageCompleted(4);
+          if (!solved) {
+            solved = true;
+            if (typeof markStageCompleted === "function") {
+              markStageCompleted(4);
+            }
           }
+          showNextButton();
         } else {
           setOutput(
             (got ? "Вывод:\n" + got + "\n\n" : "") +
@@ -79,6 +91,9 @@
 
   function bindEvents() {
     document.getElementById("run-code").addEventListener("click", runCode);
+    document.getElementById("next-task").addEventListener("click", function () {
+      window.location.reload();
+    });
     var buttons = document.querySelectorAll(".hint-actions [data-hint]");
     for (var i = 0; i < buttons.length; i += 1) {
       buttons[i].addEventListener("click", function (event) {
@@ -104,7 +119,12 @@
     ]).then(function (results) {
       var taskData = results[0];
       var hintsData = results[1];
-      task = Array.isArray(taskData) ? taskData[0] : taskData;
+      var list = Array.isArray(taskData) ? taskData : [taskData];
+      if (!list.length) {
+        throw new Error("Пустой файл задания");
+      }
+      // Случайная задача, чтобы этап можно было проходить многократно.
+      task = list[Math.floor(Math.random() * list.length)];
       if (!task) {
         throw new Error("Пустой файл задания");
       }

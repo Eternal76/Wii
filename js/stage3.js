@@ -104,6 +104,20 @@
     el.className = "builder-message";
   }
 
+  function showNextButton() {
+    var button = document.getElementById("next-task");
+    if (button) {
+      button.hidden = false;
+    }
+  }
+
+  function hideNextButton() {
+    var button = document.getElementById("next-task");
+    if (button) {
+      button.hidden = true;
+    }
+  }
+
   function checkOrder() {
     if (solved) {
       return;
@@ -128,9 +142,7 @@
       if (typeof markStageCompleted === "function") {
         markStageCompleted(3);
       }
-      window.setTimeout(function () {
-        window.location.href = "index.html";
-      }, 2000);
+      showNextButton();
       return;
     }
 
@@ -147,12 +159,16 @@
     hintIndex = 0;
     clearMarks();
     hideMessage();
+    hideNextButton();
     renderBlocks(shuffledBlocks());
   }
 
   function bindEvents() {
     document.getElementById("check-order").addEventListener("click", checkOrder);
     document.getElementById("reset-order").addEventListener("click", resetOrder);
+    document.getElementById("next-task").addEventListener("click", function () {
+      window.location.reload();
+    });
   }
 
   function initSortable() {
@@ -171,9 +187,14 @@
         return response.json();
       })
       .then(function (data) {
-        task = Array.isArray(data) ? data[0] : data;
-        if (!task || !task.blocks) {
+        var list = Array.isArray(data) ? data : [data];
+        if (!list.length) {
           throw new Error("Пустой файл задания");
+        }
+        // Случайная задача, чтобы этап можно было проходить многократно.
+        task = list[Math.floor(Math.random() * list.length)];
+        if (!task || !task.blocks) {
+          throw new Error("Пустое задание");
         }
         renderTitle();
         renderBlocks(shuffledBlocks());

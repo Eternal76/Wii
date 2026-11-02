@@ -205,6 +205,9 @@
 }
 
 .quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 8px;
 }
 
@@ -233,6 +236,64 @@
 .btn-secondary {
   background: var(--locked);
   margin-left: 8px;
+}
+
+/* ---- Этап 0. Обозначения ---- */
+
+.skip-actions {
+  margin: 16px 0 24px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+  background: rgba(15, 23, 32, 0.55);
+  overflow-y: auto;
+}
+
+.modal {
+  width: 100%;
+  max-width: 720px;
+  margin: auto;
+  padding: 22px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(15, 23, 32, 0.3);
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.modal-close:hover {
+  color: var(--text);
+}
+
+.modal-intro {
+  margin: 8px 0 18px;
+  color: var(--muted);
 }
 
 /* ---- Этап 2. Анимация ---- */

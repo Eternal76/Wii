@@ -1,6 +1,8 @@
 (function () {
   // Порог прохождения этапа: 80% правильных ответов.
   var PASS_THRESHOLD = 0.8;
+  // Сколько вопросов случайно берётся из каждой темы.
+  var QUESTIONS_PER_TOPIC = 2;
 
   var questions = [];
   // Ответы ученика: { id: "вариант" } или { id: { left: right } } для matching.
@@ -27,6 +29,29 @@
       copy[j] = tmp;
     }
     return copy;
+  }
+
+  // Группирует вопросы по теме, берёт по QUESTIONS_PER_TOPIC случайных из каждой
+  // и перемешивает итоговый список, чтобы темы шли вразнобой.
+  function selectQuestions(all) {
+    var byTopic = {};
+    var topics = [];
+    for (var i = 0; i < all.length; i += 1) {
+      var topic = all[i].topic || "Без темы";
+      if (!byTopic[topic]) {
+        byTopic[topic] = [];
+        topics.push(topic);
+      }
+      byTopic[topic].push(all[i]);
+    }
+    var picked = [];
+    for (var t = 0; t < topics.length; t += 1) {
+      var group = shuffle(byTopic[topics[t]]);
+      // Если в теме меньше вопросов, чем нужно, берём столько, сколько есть.
+      var take = Math.min(QUESTIONS_PER_TOPIC, group.length);
+      picked = picked.concat(group.slice(0, take));
+    }
+    return shuffle(picked);
   }
 
   function findQuestion(id) {
@@ -212,6 +237,18 @@
     }
   }
 
+  // Кнопки после завершения: при успехе — «На главную» и «Пройти заново»,
+  // при неудаче — только «Пройти заново».
+  function renderFinishActions(passed) {
+    var actions = document.getElementById("quiz-actions");
+    var html = "";
+    if (passed) {
+      html += '<button type="button" class="btn" id="go-home">На главную</button>';
+    }
+    html += '<button type="button" class="btn" id="retry-stage">Пройти заново</button>';
+    actions.innerHTML = html;
+  }
+
   // ---- Мгновенная проверка и обратная связь ----
 
   function lockCard(card) {
@@ -362,6 +399,7 @@
     var correct = countCorrect();
     var ratio = total ? correct / total : 0;
     if (ratio >= PASS_THRESHOLD) {
+      stageState = "passed";
       showStatus(
         "Этап пройден! Правильных ответов: " + correct + " из " + total + ".",
         "pass"
@@ -369,9 +407,7 @@
       if (typeof markStageCompleted === "function") {
         markStageCompleted(1);
       }
-      window.setTimeout(function () {
-        window.location.href = "index.html";
-      }, 1200);
+      renderFinishActions(true);
       return;
     }
     stageState = "failed";
@@ -383,9 +419,7 @@
         " (нужно 80%). Давай повторим этап ещё раз.",
       "fail"
     );
-    var actions = document.getElementById("quiz-actions");
-    actions.innerHTML =
-      '<button type="button" class="btn" id="retry-stage">Пройти заново</button>';
+    renderFinishActions(false);
   }
 
   // ---- События ----
@@ -413,6 +447,9 @@
       if (event.target.id === "retry-stage") {
         window.location.reload();
       }
+      if (event.target.id === "go-home") {
+        window.location.href = "index.html";
+      }
     });
   }
 
@@ -425,7 +462,7 @@
         return response.json();
       })
       .then(function (data) {
-        questions = data;
+        questions = selectQuestions(data);
         renderQuestions();
       })
       .catch(function () {

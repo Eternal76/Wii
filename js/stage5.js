@@ -3,6 +3,7 @@
   var task = null;
   var passedSmall = false;
   var passedBig = false;
+  var solved = false;
 
   function escapeHtml(value) {
     return String(value)
@@ -101,7 +102,7 @@
             passedBig = true;
           }
           if (passedSmall && passedBig) {
-            showReflection();
+            completeStage();
           }
         } else {
           setOutput(
@@ -124,10 +125,27 @@
     }
   }
 
-  function finishTrainer() {
+  function showNextButton() {
+    var button = document.getElementById("next-task");
+    if (button) {
+      button.hidden = false;
+    }
+  }
+
+  // Оба теста пройдены: засчитываем этап, показываем рефлексию и кнопку следующей задачи.
+  function completeStage() {
+    if (solved) {
+      return;
+    }
+    solved = true;
     if (typeof markStageCompleted === "function") {
       markStageCompleted(5);
     }
+    showReflection();
+    showNextButton();
+  }
+
+  function finishTrainer() {
     window.location.href = "index.html";
   }
 
@@ -137,6 +155,9 @@
     });
     document.getElementById("check-big").addEventListener("click", function () {
       check("big");
+    });
+    document.getElementById("next-task").addEventListener("click", function () {
+      window.location.reload();
     });
     document.getElementById("finish-trainer").addEventListener("click", finishTrainer);
   }
@@ -150,7 +171,12 @@
         return response.json();
       })
       .then(function (data) {
-        task = Array.isArray(data) ? data[0] : data;
+        var list = Array.isArray(data) ? data : [data];
+        if (!list.length) {
+          throw new Error("Пустой файл задания");
+        }
+        // Случайная задача, чтобы этап можно было проходить многократно.
+        task = list[Math.floor(Math.random() * list.length)];
         if (!task) {
           throw new Error("Пустой файл задания");
         }
