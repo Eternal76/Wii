@@ -133,7 +133,7 @@
       {"id": "i1", "text": "f = open(\"input.txt\")\nlines = f.readlines()\nf.close()"},
       {"id": "i6", "text": "    if \"A\" in line:\n        count += 1"},
       {"id": "i4", "text": "    if line.startswith(\"A\"):\n        count += 1"},
-      {"id": "i8", "text": "    if line.startswith(\"a\"):\n        count += 1"},
+      {"id": "i8", "text": "    if line.endswith(\"A\"):\n        count += 1"},
       {"id": "i2", "text": "count = 0"},
       {"id": "i7", "text": "    count = 0"},
       {"id": "i5", "text": "print(count)"}

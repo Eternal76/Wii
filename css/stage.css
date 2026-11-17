@@ -447,16 +447,56 @@
   font-size: 0.95rem;
 }
 
+.builder-zones {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.builder-zone-title {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Зоны всегда видимы как цель для перетаскивания, даже пустые. */
 .sortable-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  min-height: 96px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  border: 1px dashed #cfd8e3;
+  border-radius: 14px;
+  background: #f7f9fc;
+}
+
+.program-list {
+  border-style: solid;
+  border-color: #b9d3f5;
+  background: var(--available-bg);
+  counter-reset: step;
+}
+
+.sortable-list:empty::after {
+  content: "Перетащите блоки сюда";
+  padding: 6px 4px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+  pointer-events: none;
 }
 
 .sortable-list .block-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   margin: 0;
   padding: 12px 14px;
   border: 1px solid #d5dce6;
@@ -470,7 +510,29 @@
   cursor: grabbing;
 }
 
+/* Программа читается как последовательность: у каждого блока свой номер. */
+.program-list .block-item {
+  counter-increment: step;
+}
+
+.program-list .block-item::before {
+  content: counter(step);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--available);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .sortable-list .block-item pre {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   overflow-x: auto;
   font-family: Consolas, "Courier New", monospace;
@@ -481,6 +543,23 @@
 
 .sortable-list .block-item code {
   font-family: inherit;
+}
+
+.block-btn {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid #d5dce6;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--available);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.block-btn:hover {
+  border-color: var(--available);
+  background: var(--available-bg);
 }
 
 .sortable-list .block-item.correct {
@@ -671,6 +750,17 @@
   margin-top: 18px;
 }
 
+/* Плашка восстановленного черновика — в духе .builder-message.is-hint. */
+.draft-note {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--available);
+  border-radius: 10px;
+  background: var(--available-bg);
+  color: var(--available);
+  font-weight: 600;
+}
+
 @media (max-width: 720px) {
   .anim-layout {
     grid-template-columns: 1fr;
@@ -679,6 +769,10 @@
 
 @media (max-width: 640px) {
   .matching {
+    grid-template-columns: 1fr;
+  }
+
+  .builder-zones {
     grid-template-columns: 1fr;
   }
 }

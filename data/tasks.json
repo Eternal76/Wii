@@ -62,7 +62,7 @@
     "small_file": "files/task_5_small.txt",
     "big_file": "files/task_5_big.txt",
     "expected_small": "3",
-    "expected_big": "3",
+    "expected_big": "4",
     "reflection": [
       "Что было самым сложным в написании программы?",
       "Какую ошибку ты допустил и как её обнаружил?",
@@ -118,7 +118,7 @@
     "small_file": "files/task_9_small.txt",
     "big_file": "files/task_9_big.txt",
     "expected_small": "6",
-    "expected_big": "6",
+    "expected_big": "10",
     "reflection": [
       "Что было самым сложным в написании программы?",
       "Какую ошибку ты допустил и как её обнаружил?",

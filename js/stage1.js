@@ -1,35 +1,29 @@
 (function () {
+  // Прямой URL в недоступный этап — сразу на главную, до загрузки данных.
+  if (window.Store) {
+    Store.requireStage(1);
+  }
+
   // Порог прохождения этапа: 80% правильных ответов.
   var PASS_THRESHOLD = 0.8;
   // Сколько вопросов случайно берётся из каждой темы.
   var QUESTIONS_PER_TOPIC = 2;
+
+  // Хранилище может быть ещё не подключено — тогда работаем только в памяти.
+  var S = window.Store;
+  var SESSION_KEY = "stage1";
+  // Меньше этого числа восстановленных вопросов — сессия считается битой.
+  var MIN_RESTORE = 8;
 
   var questions = [];
   // Ответы ученика: { id: "вариант" } или { id: { left: right } } для matching.
   var answers = {};
   // Результат проверки: { id: true/false }. Ключ появляется после проверки вопроса.
   var results = {};
-  // Состояние этапа: "in-progress" | "failed".
+  // Состояние этапа: "in-progress" | "passed" | "failed".
   var stageState = "in-progress";
-
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  function shuffle(items) {
-    var copy = items.slice();
-    for (var i = copy.length - 1; i > 0; i -= 1) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = copy[i];
-      copy[i] = copy[j];
-      copy[j] = tmp;
-    }
-    return copy;
-  }
+  // Сохранённая сессия: { ids: [], answers: {}, results: {}, done: false }.
+  var session = null;
 
   // Группирует вопросы по теме, берёт по QUESTIONS_PER_TOPIC случайных из каждой
   // и перемешивает итоговый список, чтобы темы шли вразнобой.
@@ -46,12 +40,109 @@
     }
     var picked = [];
     for (var t = 0; t < topics.length; t += 1) {
-      var group = shuffle(byTopic[topics[t]]);
+      var group = Shared.shuffle(byTopic[topics[t]]);
       // Если в теме меньше вопросов, чем нужно, берём столько, сколько есть.
       var take = Math.min(QUESTIONS_PER_TOPIC, group.length);
       picked = picked.concat(group.slice(0, take));
     }
-    return shuffle(picked);
+    return Shared.shuffle(picked);
+  }
+
+  // ---- Сохранение сессии ----
+
+  // Пишет текущий набор вопросов, ответы и результаты в Store.
+  function persistSession() {
+    if (!S || !session) {
+      return;
+    }
+    session.ids = questions.map(function (question) {
+      return question.id;
+    });
+    session.answers = answers;
+    session.results = results;
+    S.setSession(SESSION_KEY, session);
+  }
+
+  function persistAnswer(id) {
+    if (S) {
+      S.setAnswer(SESSION_KEY + ":" + id, answers[id]);
+    }
+    persistSession();
+  }
+
+  // Восстанавливает незавершённую сессию: те же вопросы в том же порядке.
+  function restoreSession(all) {
+    if (!S) {
+      return false;
+    }
+    var saved = S.getSession(SESSION_KEY);
+    if (!saved || saved.done === true || !Array.isArray(saved.ids)) {
+      return false;
+    }
+    var byId = {};
+    for (var i = 0; i < all.length; i += 1) {
+      byId[all[i].id] = all[i];
+    }
+    var picked = [];
+    for (var j = 0; j < saved.ids.length; j += 1) {
+      var question = byId[saved.ids[j]];
+      if (question) {
+        picked.push(question);
+      }
+    }
+    // Вопросы могли переехать в stage1.json — тогда начинаем заново.
+    if (picked.length < MIN_RESTORE) {
+      return false;
+    }
+    questions = picked;
+    answers = saved.answers || {};
+    results = saved.results || {};
+    session = { ids: [], answers: answers, results: results, done: false };
+    persistSession();
+    return true;
+  }
+
+  // Возвращает в разметку отмеченные варианты и выбранные соответствия.
+  function restoreAnswers() {
+    for (var i = 0; i < questions.length; i += 1) {
+      var question = questions[i];
+      var value = answers[question.id];
+      if (!value) {
+        continue;
+      }
+      var card = document.querySelector('.question-card[data-id="' + question.id + '"]');
+      if (!card) {
+        continue;
+      }
+      if (question.type === "matching") {
+        var selects = card.querySelectorAll("select[data-left]");
+        for (var j = 0; j < selects.length; j += 1) {
+          var right = value[selects[j].getAttribute("data-left")];
+          if (right) {
+            selects[j].value = right;
+            selects[j].classList.add("is-filled");
+          }
+        }
+      } else {
+        var radios = card.querySelectorAll('input[type="radio"]');
+        for (var k = 0; k < radios.length; k += 1) {
+          if (radios[k].value === value) {
+            radios[k].checked = true;
+            radios[k].parentNode.classList.add("is-selected");
+          }
+        }
+      }
+    }
+  }
+
+  // Подсвечивает уже проверенные вопросы и снова их блокирует.
+  function restoreResults() {
+    for (var i = 0; i < questions.length; i += 1) {
+      var question = questions[i];
+      if (Object.prototype.hasOwnProperty.call(results, question.id)) {
+        paintResult(question, results[question.id] === true);
+      }
+    }
   }
 
   function findQuestion(id) {
@@ -141,18 +232,19 @@
   // ---- Рендер вопросов ----
 
   function renderChoiceOptions(question) {
+    var options = Shared.stableOptions(String(question.id), question.options);
     var html = '<div class="options">';
-    for (var i = 0; i < question.options.length; i += 1) {
-      var option = question.options[i];
+    for (var i = 0; i < options.length; i += 1) {
+      var option = options[i];
       html +=
         '<label class="option">' +
         '<input type="radio" name="q-' +
         question.id +
         '" value="' +
-        escapeHtml(option) +
+        Shared.escapeHtml(option) +
         '">' +
         "<span>" +
-        escapeHtml(option) +
+        Shared.escapeHtml(option) +
         "</span></label>";
     }
     html += "</div>";
@@ -160,7 +252,7 @@
   }
 
   function renderMatching(question) {
-    var rights = shuffle(
+    var rights = Shared.shuffle(
       question.pairs.map(function (pair) {
         return pair.right;
       })
@@ -170,21 +262,21 @@
       var left = question.pairs[i].left;
       html +=
         '<div class="matching-left">' +
-        escapeHtml(left) +
+        Shared.escapeHtml(left) +
         "</div>" +
         '<select data-question="' +
         question.id +
         '" data-left="' +
-        escapeHtml(left) +
+        Shared.escapeHtml(left) +
         '">' +
         '<option value="">Выберите назначение</option>';
       for (var j = 0; j < rights.length; j += 1) {
         var right = rights[j];
         html +=
           '<option value="' +
-          escapeHtml(right) +
+          Shared.escapeHtml(right) +
           '">' +
-          escapeHtml(right) +
+          Shared.escapeHtml(right) +
           "</option>";
       }
       html += "</select>";
@@ -202,10 +294,10 @@
       (index + 1) +
       "</p>" +
       '<p class="question-prompt">' +
-      escapeHtml(question.prompt) +
+      Shared.escapeHtml(question.prompt) +
       "</p>";
     if (question.type === "code_output" && question.code) {
-      html += '<pre class="code-block"><code>' + escapeHtml(question.code) + "</code></pre>";
+      html += '<pre class="code-block"><code>' + Shared.escapeHtml(question.code) + "</code></pre>";
     }
     if (question.type === "matching") {
       html += renderMatching(question);
@@ -276,10 +368,10 @@
     box.className = "question-feedback " + (correct ? "is-correct" : "is-incorrect");
     box.innerHTML =
       '<p class="feedback-title">' +
-      escapeHtml(title) +
+      Shared.escapeHtml(title) +
       "</p>" +
       '<p class="feedback-text">' +
-      escapeHtml(text) +
+      Shared.escapeHtml(text) +
       "</p>";
   }
 
@@ -312,6 +404,22 @@
     }
   }
 
+  // Применяет к карточке результат проверки: подсветка, блокировка, подсказка.
+  function paintResult(question, correct) {
+    var card = document.querySelector('.question-card[data-id="' + question.id + '"]');
+    if (!card) {
+      return;
+    }
+    if (question.type === "matching") {
+      highlightMatching(card, question);
+    } else {
+      highlightChoice(card, question, correct);
+    }
+    card.classList.add(correct ? "is-correct" : "is-incorrect");
+    lockCard(card);
+    showFeedback(card, correct, question.pedagogical_hint);
+  }
+
   function checkQuestion(id) {
     if (Object.prototype.hasOwnProperty.call(results, id)) {
       return;
@@ -322,18 +430,13 @@
     }
     var correct = isCorrect(question);
     results[id] = correct;
-
-    var card = document.querySelector('.question-card[data-id="' + id + '"]');
-    if (card) {
-      if (question.type === "matching") {
-        highlightMatching(card, question);
-      } else {
-        highlightChoice(card, question, correct);
-      }
-      card.classList.add(correct ? "is-correct" : "is-incorrect");
-      lockCard(card);
-      showFeedback(card, correct, question.pedagogical_hint);
+    // Слабые темы на главной считаются по этим записям.
+    if (S) {
+      S.setResult(SESSION_KEY + ":" + id, { ok: correct, topic: question.topic });
     }
+    persistSession();
+
+    paintResult(question, correct);
     updateProgress();
   }
 
@@ -341,6 +444,7 @@
 
   function setChoiceAnswer(questionId, value) {
     answers[questionId] = value;
+    persistAnswer(questionId);
     var card = document.querySelector('.question-card[data-id="' + questionId + '"]');
     if (card) {
       var options = card.querySelectorAll(".option");
@@ -380,6 +484,7 @@
       }
       answers[questionId][left] = right;
     }
+    persistAnswer(questionId);
     var select = document.querySelector(
       'select[data-question="' + questionId + '"][data-left="' + left + '"]'
     );
@@ -400,12 +505,19 @@
     var ratio = total ? correct / total : 0;
     if (ratio >= PASS_THRESHOLD) {
       stageState = "passed";
+      // Пройденную сессию при следующей загрузке заводим заново.
+      if (session) {
+        session.done = true;
+        persistSession();
+      }
       showStatus(
         "Этап пройден! Правильных ответов: " + correct + " из " + total + ".",
         "pass"
       );
-      if (typeof markStageCompleted === "function") {
-        markStageCompleted(1);
+      if (S && typeof S.markStageCompleted === "function") {
+        S.markStageCompleted(1, ratio);
+      } else if (typeof window.markStageCompleted === "function") {
+        window.markStageCompleted(1);
       }
       renderFinishActions(true);
       return;
@@ -445,6 +557,10 @@
         finishStage();
       }
       if (event.target.id === "retry-stage") {
+        // Заново — значит с новыми вопросами и чистыми ответами.
+        if (S) {
+          S.clearSession(SESSION_KEY);
+        }
         window.location.reload();
       }
       if (event.target.id === "go-home") {
@@ -454,16 +570,20 @@
   }
 
   function loadQuestions() {
-    fetch("data/stage1.json")
-      .then(function (response) {
-        if (!response.ok) {
-          throw new Error("Не удалось загрузить вопросы");
-        }
-        return response.json();
-      })
+    Shared.loadJson("data/stage1.json")
       .then(function (data) {
-        questions = selectQuestions(data);
+        // Незавершённая сессия возвращает те же вопросы с ответами после F5.
+        if (!restoreSession(data)) {
+          questions = selectQuestions(data);
+          answers = {};
+          results = {};
+          session = { ids: [], answers: {}, results: {}, done: false };
+          persistSession();
+        }
         renderQuestions();
+        restoreAnswers();
+        restoreResults();
+        updateProgress();
       })
       .catch(function () {
         showStatus(

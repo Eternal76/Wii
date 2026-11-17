@@ -1,17 +1,14 @@
 (function () {
+  // Прямой URL в недоступный этап — сразу на главную, до загрузки данных.
+  if (window.Store) {
+    Store.requireStage(2);
+  }
+
   // Случайно выбранная анимация и индекс активного шага.
   var animation = null;
   var currentIndex = 0;
   // Этап засчитывается один раз, когда анимация пройдена до конца.
   var stageMarked = false;
-
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
 
   function renderTitle(title) {
     document.getElementById("anim-title").textContent = title || "";
@@ -22,7 +19,7 @@
     var lines = String(code).split("\n");
     var html = "";
     for (var i = 0; i < lines.length; i += 1) {
-      var text = lines[i] === "" ? "&nbsp;" : escapeHtml(lines[i]);
+      var text = lines[i] === "" ? "&nbsp;" : Shared.escapeHtml(lines[i]);
       html += '<li class="code-line" id="line-' + i + '"><span class="line-text">' + text + "</span></li>";
     }
     document.getElementById("anim-code").innerHTML = html;
@@ -44,10 +41,10 @@
       }
       html +=
         '<tr><td class="var-name">' +
-        escapeHtml(name) +
+        Shared.escapeHtml(name) +
         "</td>" +
         '<td class="var-value">' +
-        escapeHtml(value) +
+        Shared.escapeHtml(value) +
         "</td></tr>";
     }
     document.getElementById("vars-body").innerHTML = html;
@@ -109,9 +106,15 @@
       showStatus("Анимация разобрана до конца. Можно взять другой сценарий.", "pass");
       if (!stageMarked) {
         stageMarked = true;
-        if (typeof markStageCompleted === "function") {
-          markStageCompleted(2);
+        if (window.Store && typeof Store.markStageCompleted === "function") {
+          Store.markStageCompleted(2, 1);
+        } else if (typeof window.markStageCompleted === "function") {
+          window.markStageCompleted(2);
         }
+      }
+      // Проверяемого ответа тут нет: «долистал до конца» и есть «прошёл».
+      if (window.Store) {
+        Store.setResult("stage2:" + animation.id, { ok: true });
       }
     } else {
       stepBtn.disabled = false;
@@ -153,13 +156,7 @@
   }
 
   function loadAnimation() {
-    fetch("data/stage2.json")
-      .then(function (response) {
-        if (!response.ok) {
-          throw new Error("Не удалось загрузить анимацию");
-        }
-        return response.json();
-      })
+    Shared.loadJson("data/stage2.json")
       .then(function (data) {
         var list = Array.isArray(data) ? data : [data];
         if (!list.length) {

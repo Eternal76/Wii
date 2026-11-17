@@ -82,7 +82,8 @@ def make_number_lines(n, alphabet, count_range):
 
 
 def write_lines(path, lines):
-    with open(path, "w", encoding="utf-8") as f:
+    # newline="\r\n" — одинаковые переводы строк на любой ОС.
+    with open(path, "w", encoding="utf-8", newline="\r\n") as f:
         f.write("\n".join(lines) + "\n")
 
 
@@ -236,6 +237,21 @@ for task_id, alphabet, maker, small_kw, big_kw, answer_func in TASKS:
     exp_big = answer_func(big_lines)
 
     print(f"{task_id}: small={exp_small}  big={exp_big}")
+
+# Большие файлы, где ответ обязан отличаться от ответа на малом файле.
+# task_5: в большом файле нет цепочек короче 4 символов (на малом минимум 3).
+# task_9: алфавит шире, поэтому подстрока без повторов длиннее 6 (на малом 6).
+# Свой seed на задачу, чтобы не сдвигать последовательность основного прохода.
+BIG_OVERRIDES = [
+    ("task_5", ABC, make_run_lines, dict(runs_range=(6, 10), run_len_range=(4, 7)), answer_5),
+    ("task_9", "ABCDEFGHIJ", make_random_lines, dict(length_range=(20, 30)), answer_9),
+]
+
+for task_id, alphabet, maker, big_kw, answer_func in BIG_OVERRIDES:
+    random.seed(20261029 + int(task_id.split("_")[1]))
+    big_lines = maker(1000, alphabet, **big_kw)
+    write_lines(os.path.join(FILES, task_id + "_big.txt"), big_lines)
+    print(f"{task_id}: big={answer_func(big_lines)}  (перегенерирован)")
 
 print("\n--- Пример первых строк (для контроля) ---")
 for task_id, _, _, _, _, _ in TASKS:

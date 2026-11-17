@@ -1,4 +1,9 @@
 (function () {
+  // Прямой URL в недоступный этап — сразу на главную, до загрузки данных.
+  if (window.Store) {
+    Store.requireStage(0);
+  }
+
   // Порог прохождения модуля: 80% правильных ответов.
   var PASS_THRESHOLD = 0.8;
 
@@ -16,25 +21,6 @@
   var placementQuestions = [];
   var placementChecked = false;
   var PLACEMENT_THRESHOLD = 0.9;
-
-  function shuffle(items) {
-    var copy = items.slice();
-    for (var i = copy.length - 1; i > 0; i -= 1) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = copy[i];
-      copy[i] = copy[j];
-      copy[j] = tmp;
-    }
-    return copy;
-  }
-
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
 
   function currentModule() {
     return modules[currentIndex] || null;
@@ -105,18 +91,19 @@
   // ---- Рендер вопросов ----
 
   function renderChoiceOptions(task) {
+    var options = Shared.stableOptions(String(task.id), task.options);
     var html = '<div class="options">';
-    for (var i = 0; i < task.options.length; i += 1) {
-      var option = task.options[i];
+    for (var i = 0; i < options.length; i += 1) {
+      var option = options[i];
       html +=
         '<label class="option">' +
         '<input type="radio" name="q-' +
-        escapeHtml(task.id) +
+        Shared.escapeHtml(task.id) +
         '" value="' +
-        escapeHtml(option) +
+        Shared.escapeHtml(option) +
         '">' +
         "<span>" +
-        escapeHtml(option) +
+        Shared.escapeHtml(option) +
         "</span></label>";
     }
     html += "</div>";
@@ -126,16 +113,16 @@
   function renderTask(task, index) {
     var html =
       '<section class="question-card" data-id="' +
-      escapeHtml(task.id) +
+      Shared.escapeHtml(task.id) +
       '">' +
       '<p class="question-meta">Вопрос ' +
       (index + 1) +
       "</p>" +
       '<p class="question-prompt">' +
-      escapeHtml(task.prompt) +
+      Shared.escapeHtml(task.prompt) +
       "</p>";
     if (task.type === "code_output" && task.code) {
-      html += '<pre class="code-block"><code>' + escapeHtml(task.code) + "</code></pre>";
+      html += '<pre class="code-block"><code>' + Shared.escapeHtml(task.code) + "</code></pre>";
     }
     html += renderChoiceOptions(task);
     html += '<div class="question-feedback" hidden></div>';
@@ -195,10 +182,10 @@
     box.className = "question-feedback " + (correct ? "is-correct" : "is-incorrect");
     box.innerHTML =
       '<p class="feedback-title">' +
-      escapeHtml(title) +
+      Shared.escapeHtml(title) +
       "</p>" +
       '<p class="feedback-text">' +
-      escapeHtml(text) +
+      Shared.escapeHtml(text) +
       "</p>";
   }
 
@@ -229,6 +216,11 @@
     }
     var correct = value === task.correct;
     results[id] = correct;
+    // Результат для диагностики: тема нужна только на будущее, weakTopics читает stage1:*.
+    if (window.Store) {
+      var module = currentModule();
+      Store.setResult("stage0:" + task.id, { ok: correct, topic: module && module.title });
+    }
 
     var card = document.querySelector('.question-card[data-id="' + id + '"]');
     if (card) {
@@ -273,6 +265,14 @@
     }
     if (correct / total >= PASS_THRESHOLD) {
       moduleState = "passed";
+      // Список сданных модулей — только для диагностики, UI его не восстанавливает.
+      if (window.Store) {
+        var saved = (Store.getSession("stage0") || {}).passedModules || [];
+        var moduleId = currentModule().id;
+        Store.setSession("stage0", {
+          passedModules: saved.indexOf(moduleId) === -1 ? saved.concat(moduleId) : saved
+        });
+      }
       showStatus("Модуль пройден! Переход к следующему.", "pass");
     } else {
       moduleState = "failed";
@@ -312,8 +312,10 @@
   }
 
   function finishStage0() {
-    if (typeof markStageCompleted === "function") {
-      markStageCompleted(0);
+    if (window.Store && typeof Store.markStageCompleted === "function") {
+      Store.markStageCompleted(0, 1);
+    } else if (typeof window.markStageCompleted === "function") {
+      window.markStageCompleted(0);
     }
     window.location.href = "index.html";
   }
@@ -349,15 +351,9 @@
       renderPlacement();
       return;
     }
-    fetch("data/placement.json")
-      .then(function (response) {
-        if (!response.ok) {
-          throw new Error("Не удалось загрузить тест");
-        }
-        return response.json();
-      })
+    Shared.loadJson("data/placement.json")
       .then(function (data) {
-        placementQuestions = shuffle(data.questions || []);
+        placementQuestions = Shared.shuffle(data.questions || []);
         renderPlacement();
       })
       .catch(function () {
@@ -410,8 +406,10 @@
     var total = placementQuestions.length;
     var ratio = total ? correctCount / total : 0;
     if (ratio >= PLACEMENT_THRESHOLD) {
-      if (typeof markStageCompleted === "function") {
-        markStageCompleted(0);
+      if (window.Store && typeof Store.markStageCompleted === "function") {
+        Store.markStageCompleted(0, 1);
+      } else if (typeof window.markStageCompleted === "function") {
+        window.markStageCompleted(0);
       }
       showPlacementStatus("Вы успешно прошли тест на знание базы! Этап 1 разблокирован", "pass");
       document.getElementById("placement-actions").innerHTML =
@@ -474,13 +472,7 @@
   }
 
   function loadData() {
-    fetch("data/stage0.json")
-      .then(function (response) {
-        if (!response.ok) {
-          throw new Error("Не удалось загрузить данные этапа");
-        }
-        return response.json();
-      })
+    Shared.loadJson("data/stage0.json")
       .then(function (data) {
         modules = data.modules || [];
         totalModules = modules.length;

@@ -1,8 +1,14 @@
 (function () {
+  // Прямой URL в недоступный этап — сразу на главную, до загрузки данных.
+  if (window.Store) {
+    Store.requireStage(4);
+  }
+
   var editor = null;
   var task = null;
   var hints = [];
   var solved = false;
+  var running = false;
 
   function showNextButton() {
     var button = document.getElementById("next-task");
@@ -27,18 +33,7 @@
   }
 
   function initEditor() {
-    var textarea = document.getElementById("editor");
-    if (typeof CodeMirror === "undefined") {
-      textarea.value = "";
-      return;
-    }
-    editor = CodeMirror.fromTextArea(textarea, {
-      mode: "python",
-      lineNumbers: true,
-      indentUnit: 4,
-      tabSize: 4,
-      lineWrapping: true
-    });
+    editor = Shared.initEditor("editor");
   }
 
   function showHint(level) {
@@ -54,29 +49,46 @@
   }
 
   function runCode() {
-    if (!task) {
+    if (!task || running) {
       return;
     }
     var code = editor ? editor.getValue() : document.getElementById("editor").value;
+    // Пока идёт прогон, второй запуск смешал бы вывод: stdout у Pyodide общий.
+    var button = document.getElementById("run-code");
+    var label = button.textContent;
+    running = true;
+    button.disabled = true;
+    button.textContent = "Выполняется…";
     setOutput("Выполняется…");
     runPythonWithInput(code, task.input_data)
       .then(function (result) {
         if (result.error && result.error.trim()) {
+          if (window.Store) {
+            Store.setResult("stage4:" + task.id, { ok: false });
+          }
           setOutput("Ошибка:\n" + result.error.replace(/\s+$/, ""), "error");
           return;
         }
         var got = result.output.replace(/\s+$/, "");
         var expected = String(task.expected_output).replace(/\s+$/, "");
         if (got.trim() === expected.trim()) {
+          if (window.Store) {
+            Store.setResult("stage4:" + task.id, { ok: true });
+          }
           setOutput((got ? got + "\n\n" : "") + "Верно! Задача решена", "ok");
           if (!solved) {
             solved = true;
-            if (typeof markStageCompleted === "function") {
-              markStageCompleted(4);
+            if (window.Store && typeof Store.markStageCompleted === "function") {
+              Store.markStageCompleted(4, 1);
+            } else if (typeof window.markStageCompleted === "function") {
+              window.markStageCompleted(4);
             }
           }
           showNextButton();
         } else {
+          if (window.Store) {
+            Store.setResult("stage4:" + task.id, { ok: false });
+          }
           setOutput(
             (got ? "Вывод:\n" + got + "\n\n" : "") +
               "Твой ответ: " + (got.trim() || "(пусто)") + ". Ожидалось: " + expected + ".",
@@ -85,7 +97,15 @@
         }
       })
       .catch(function (err) {
+        if (window.Store) {
+          Store.setResult("stage4:" + task.id, { ok: false });
+        }
         setOutput("Ошибка: " + (err && err.message ? err.message : String(err)), "error");
+      })
+      .finally(function () {
+        running = false;
+        button.disabled = false;
+        button.textContent = label;
       });
   }
 
@@ -103,20 +123,8 @@
   }
 
   function loadData() {
-    return Promise.all([
-      fetch("data/stage4.json").then(function (response) {
-        if (!response.ok) {
-          throw new Error("stage4.json");
-        }
-        return response.json();
-      }),
-      fetch("data/hints.json").then(function (response) {
-        if (!response.ok) {
-          throw new Error("hints.json");
-        }
-        return response.json();
-      })
-    ]).then(function (results) {
+    var urls = ["data/stage4.json", "data/hints.json"];
+    return Promise.all(urls.map(Shared.loadJson)).then(function (results) {
       var taskData = results[0];
       var hintsData = results[1];
       var list = Array.isArray(taskData) ? taskData : [taskData];
@@ -135,7 +143,7 @@
 
   function startPyodide() {
     setOutput("Загрузка Python...");
-    initPyodide()
+    Promise.resolve(Shared.warmUpPyodide())
       .then(function () {
         setOutput("Готов к запуску");
       })

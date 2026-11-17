@@ -1,6 +1,4 @@
 (function () {
-  var STORAGE_KEY = "ege24_trainer_progress";
-  var STAGE_COUNT = 6;
   var STAGES = [
     { number: 0, title: "Обозначения", href: "stage0.html" },
     { number: 1, title: "Синтаксис", href: "stage1.html" },
@@ -15,42 +13,41 @@
     return new URLSearchParams(window.location.search).get("dev") === "true";
   }
 
+  // Старый формат { "0": true } — оставлен для внешних вызовов
   function getProgress() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        return {};
-      }
-      var parsed = JSON.parse(raw);
-      return parsed && typeof parsed === "object" ? parsed : {};
-    } catch (err) {
+    if (!window.Store) {
       return {};
     }
-  }
-
-  function saveProgress(progress) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  }
-
-  function markStageCompleted(stageNumber) {
-    var progress = getProgress();
-    progress[String(stageNumber)] = true;
-    saveProgress(progress);
+    var stages = Store.get().stages;
+    var progress = {};
+    for (var key in stages) {
+      if (Object.prototype.hasOwnProperty.call(stages, key) && stages[key] && stages[key].completed) {
+        progress[key] = true;
+      }
+    }
     return progress;
   }
 
+  function markStageCompleted(stageNumber, score) {
+    if (window.Store) {
+      Store.markStageCompleted(stageNumber, score);
+    }
+    return getProgress();
+  }
+
   function isStageCompleted(stageNumber) {
-    return getProgress()[String(stageNumber)] === true;
+    if (!window.Store) {
+      return false;
+    }
+    var stage = Store.getStage(stageNumber);
+    return !!stage && stage.completed;
   }
 
   function isStageAvailable(stageNumber) {
-    if (isDevMode()) {
-      return true;
+    if (!window.Store) {
+      return false;
     }
-    if (stageNumber === 0) {
-      return true;
-    }
-    return isStageCompleted(stageNumber - 1);
+    return Store.isAvailable(stageNumber);
   }
 
   function getStageStatus(stageNumber) {
@@ -73,6 +70,24 @@
     return n;
   }
 
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, function (char) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
+    });
+  }
+
+  function plural(count, one, few, many) {
+    var mod10 = count % 10;
+    var mod100 = count % 100;
+    if (mod10 === 1 && mod100 !== 11) {
+      return one;
+    }
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+      return few;
+    }
+    return many;
+  }
+
   function renderHome() {
     var grid = document.getElementById("stages-grid");
     var indicator = document.getElementById("progress-indicator");
@@ -82,13 +97,13 @@
 
     var completed = countCompleted();
     if (indicator) {
-      var percent = Math.round((completed / STAGE_COUNT) * 100);
+      var percent = Math.round((completed / STAGES.length) * 100);
       indicator.innerHTML =
         '<div class="progress-meta">' +
         "<span>Пройдено этапов: <strong>" +
         completed +
         " / " +
-        STAGE_COUNT +
+        STAGES.length +
         "</strong></span>" +
         "<span>" +
         percent +
@@ -150,6 +165,90 @@
     grid.innerHTML = html;
   }
 
+  function renderDiagnostics() {
+    var section = document.getElementById("diagnostics");
+    var content = document.getElementById("diagnostics-content");
+    if (!section || !content || !window.Store) {
+      return;
+    }
+
+    var html = "";
+    var hasData = false;
+    var i;
+
+    var stageRows = "";
+    for (i = 0; i < STAGES.length; i += 1) {
+      var stage = STAGES[i];
+      var info = Store.getStage(stage.number);
+      if (!info || (!info.attempts && info.lastScore === null)) {
+        continue;
+      }
+      var best = info.lastScore === null ? "нет данных" : Math.round(info.lastScore * 100) + "%";
+      if (!stageRows) {
+        stageRows = '<ul class="diagnostics-list">';
+      }
+      stageRows +=
+        '<li class="diagnostics-row">' +
+        '<span class="diagnostics-label">Этап ' +
+        stage.number +
+        " · " +
+        escapeHtml(stage.title) +
+        "</span>" +
+        '<span class="diagnostics-meta">попыток ' +
+        info.attempts +
+        " · лучший результат " +
+        best +
+        "</span></li>";
+    }
+    if (stageRows) {
+      html += stageRows + "</ul>";
+      hasData = true;
+    }
+
+    var weak = Store.weakTopics().slice(0, 3);
+    if (weak.length) {
+      html += '<p class="diagnostics-subtitle">Слабые темы</p><ul class="diagnostics-list">';
+      for (i = 0; i < weak.length; i += 1) {
+        html +=
+          '<li class="diagnostics-row"><span class="diagnostics-label">' +
+          escapeHtml(weak[i].topic) +
+          " — " +
+          weak[i].wrong +
+          " из " +
+          weak[i].total +
+          " ошибок</span></li>";
+      }
+      html += "</ul>";
+      hasData = true;
+    }
+
+    var reflection = Store.get().reflection;
+    var filled = 0;
+    for (var taskId in reflection) {
+      if (
+        Object.prototype.hasOwnProperty.call(reflection, taskId) &&
+        Array.isArray(reflection[taskId]) &&
+        reflection[taskId].some(function (answer) {
+          return typeof answer === "string" && answer.trim() !== "";
+        })
+      ) {
+        filled += 1;
+      }
+    }
+    if (filled > 0) {
+      html +=
+        '<p class="diagnostics-row diagnostics-reflection">Рефлексия заполнена для ' +
+        filled +
+        " " +
+        plural(filled, "задачи", "задач", "задач") +
+        "</p>";
+      hasData = true;
+    }
+
+    content.innerHTML = html;
+    section.hidden = !hasData;
+  }
+
   function renderDevBanner() {
     var banner = document.getElementById("dev-banner");
     if (!banner) {
@@ -162,7 +261,9 @@
     if (!window.confirm("Вы уверены, что хотите сбросить весь прогресс?")) {
       return;
     }
-    localStorage.removeItem(STORAGE_KEY);
+    if (window.Store) {
+      Store.reset();
+    }
     window.location.reload();
   }
 
@@ -182,6 +283,7 @@
   document.addEventListener("DOMContentLoaded", function () {
     renderDevBanner();
     renderHome();
+    renderDiagnostics();
     bindResetButton();
   });
 })();

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <title>Тренажёр ЕГЭ — задание 24</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -12,11 +13,16 @@
     <h1>Тренажёр по информатике: задание 24</h1>
     <p class="lead">Шесть этапов. Следующий открывается после прохождения предыдущего.</p>
     <section class="progress-panel" id="progress-indicator" aria-label="Индикатор прогресса"></section>
+    <section class="diagnostics-panel" id="diagnostics" aria-label="Диагностика" hidden>
+      <h2>Диагностика</h2>
+      <div id="diagnostics-content"></div>
+    </section>
     <section class="stages-grid" id="stages-grid" aria-label="Этапы тренажёра"></section>
     <div class="home-footer">
       <button type="button" class="btn-reset" id="reset-progress">Сбросить прогресс</button>
     </div>
   </main>
+  <script src="js/storage.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
