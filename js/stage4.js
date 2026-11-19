@@ -17,10 +17,20 @@
     }
   }
 
-  function setOutput(text, kind) {
+  // Вердикт объявляется live-регионом, вывод лежит рядом без атрибута:
+  // длинный вывод целиком не зачитывается, но остаётся доступным по навигации.
+  function setOutput(output, verdict, kind) {
     var el = document.getElementById("output-area");
+    var text = document.getElementById("output-text");
+    var live = document.getElementById("output-verdict");
     el.className = "output-area" + (kind ? " is-" + kind : "");
-    el.textContent = text;
+    text.textContent = output ? (verdict ? output + "\n\n" : output) : "";
+    live.textContent = verdict || "";
+  }
+
+  // Пока идёт прогон, live-регион молчит и объявляет только финальный вердикт.
+  function setBusy(busy) {
+    document.getElementById("output-area").setAttribute("aria-busy", busy ? "true" : "false");
   }
 
   function renderTask() {
@@ -39,6 +49,13 @@
   function showHint(level) {
     var el = document.getElementById("hint-area");
     var text = hints[level - 1];
+    // Все кнопки управляют одним блоком: раскрыта только та, чья подсказка показана.
+    var buttons = document.querySelectorAll(".hint-actions [data-hint]");
+    for (var i = 0; i < buttons.length; i += 1) {
+      var open =
+        Boolean(text) && Number(buttons[i].getAttribute("data-hint")) === level;
+      buttons[i].setAttribute("aria-expanded", open ? "true" : "false");
+    }
     if (!text) {
       el.hidden = true;
       el.textContent = "";
@@ -59,14 +76,15 @@
     running = true;
     button.disabled = true;
     button.textContent = "Выполняется…";
-    setOutput("Выполняется…");
+    setBusy(true);
+    setOutput("", "Выполняется…");
     runPythonWithInput(code, task.input_data)
       .then(function (result) {
         if (result.error && result.error.trim()) {
           if (window.Store) {
             Store.setResult("stage4:" + task.id, { ok: false });
           }
-          setOutput("Ошибка:\n" + result.error.replace(/\s+$/, ""), "error");
+          setOutput(result.error.replace(/\s+$/, ""), "Ошибка выполнения", "error");
           return;
         }
         var got = result.output.replace(/\s+$/, "");
@@ -75,7 +93,7 @@
           if (window.Store) {
             Store.setResult("stage4:" + task.id, { ok: true });
           }
-          setOutput((got ? got + "\n\n" : "") + "Верно! Задача решена", "ok");
+          setOutput(got, "Верно! Задача решена", "ok");
           if (!solved) {
             solved = true;
             if (window.Store && typeof Store.markStageCompleted === "function") {
@@ -90,8 +108,8 @@
             Store.setResult("stage4:" + task.id, { ok: false });
           }
           setOutput(
-            (got ? "Вывод:\n" + got + "\n\n" : "") +
-              "Твой ответ: " + (got.trim() || "(пусто)") + ". Ожидалось: " + expected + ".",
+            got ? "Вывод:\n" + got : "",
+            "Неверный ответ. Твой ответ: " + (got.trim() || "(пусто)") + ". Ожидалось: " + expected + ".",
             "fail"
           );
         }
@@ -100,12 +118,14 @@
         if (window.Store) {
           Store.setResult("stage4:" + task.id, { ok: false });
         }
-        setOutput("Ошибка: " + (err && err.message ? err.message : String(err)), "error");
+        setOutput("", "Ошибка: " + (err && err.message ? err.message : String(err)), "error");
       })
       .finally(function () {
         running = false;
         button.disabled = false;
         button.textContent = label;
+        // Занятость снимаем после записи вердикта: объявится уже финальный текст.
+        setBusy(false);
       });
   }
 
@@ -142,13 +162,17 @@
   }
 
   function startPyodide() {
-    setOutput("Загрузка Python...");
+    setOutput("", "Загрузка Python...");
     Promise.resolve(Shared.warmUpPyodide())
       .then(function () {
-        setOutput("Готов к запуску");
+        setOutput("", "Готов к запуску");
       })
       .catch(function (err) {
-        setOutput("Не удалось загрузить Python: " + (err && err.message ? err.message : String(err)), "error");
+        setOutput(
+          "",
+          "Не удалось загрузить Python: " + (err && err.message ? err.message : String(err)),
+          "error"
+        );
       });
   }
 
@@ -158,6 +182,7 @@
     loadData()
       .catch(function () {
         setOutput(
+          "",
           "Не удалось загрузить задание. Откройте сайт через локальный сервер, а не file://.",
           "error"
         );

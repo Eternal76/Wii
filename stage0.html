@@ -22,14 +22,14 @@
           <span id="module-label">Модуль 1 из 5</span>
           <span id="answered-percent">0%</span>
         </div>
-        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="answered-bar">
+        <div class="progress-bar" role="progressbar" aria-label="Прогресс ответов по модулю" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Отвечено 0 из 0" id="answered-bar">
           <div class="progress-bar-fill" id="answered-bar-fill" style="width:0%"></div>
         </div>
       </section>
       <h2 class="anim-heading" id="module-title">Загрузка…</h2>
       <div id="questions" class="questions"></div>
       <div id="module-actions" class="quiz-actions"></div>
-      <p id="module-status" class="quiz-status" hidden></p>
+      <p id="module-status" class="quiz-status" aria-live="polite" hidden></p>
     </article>
   </main>
   <div class="modal-overlay" id="placement-modal" hidden>
@@ -43,7 +43,7 @@
       <div class="quiz-actions" id="placement-actions">
         <button type="button" class="btn" id="check-placement">Проверить</button>
       </div>
-      <p class="quiz-status" id="placement-status" hidden></p>
+      <p class="quiz-status" id="placement-status" aria-live="polite" hidden></p>
     </div>
   </div>
   <script src="js/storage.js"></script>

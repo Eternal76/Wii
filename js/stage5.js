@@ -24,10 +24,15 @@
     };
   }
 
-  function setOutput(text, kind) {
+  // Вердикт объявляется live-регионом, вывод лежит рядом без атрибута:
+  // длинный вывод целиком не зачитывается, но остаётся доступным по навигации.
+  function setOutput(output, verdict, kind) {
     var el = document.getElementById("output-area");
+    var text = document.getElementById("output-text");
+    var live = document.getElementById("output-verdict");
     el.className = "output-area" + (kind ? " is-" + kind : "");
-    el.textContent = text;
+    text.textContent = output ? (verdict ? output + "\n\n" : output) : "";
+    live.textContent = verdict || "";
   }
 
   function renderTask() {
@@ -149,6 +154,8 @@
       button.disabled = busy;
       button.textContent = busy && ids[i] === activeId ? "Выполняется…" : button.getAttribute("data-label");
     }
+    // Пока идёт прогон, live-регион молчит и объявляет только финальный вердикт.
+    document.getElementById("output-area").setAttribute("aria-busy", busy ? "true" : "false");
   }
 
   function check(which) {
@@ -159,7 +166,7 @@
     saveDraft();
     var code = getCode();
     if (!code.trim()) {
-      setOutput("Сначала напишите код программы.", "fail");
+      setOutput("", "Сначала напишите код программы.", "fail");
       return;
     }
     var path = which === "small" ? task.small_file : task.big_file;
@@ -168,21 +175,21 @@
 
     running = true;
     setChecking(true, which === "small" ? "check-small" : "check-big");
-    setOutput("Выполняется…");
+    setOutput("", "Выполняется…");
     loadFile(path)
       .then(function (fileContent) {
         return runPythonWithInput(code, fileContent);
       })
       .then(function (result) {
         if (result.error && result.error.trim()) {
-          setOutput("Ошибка:\n" + result.error.replace(/\s+$/, ""), "error");
+          setOutput(result.error.replace(/\s+$/, ""), "Ошибка выполнения", "error");
           saveCheckResult();
           return;
         }
         var got = result.output.replace(/\s+$/, "");
         var expectedTrim = String(expected).replace(/\s+$/, "");
         if (got.trim() === expectedTrim.trim()) {
-          setOutput((got ? got + "\n\n" : "") + label, "ok");
+          setOutput(got, label, "ok");
           if (which === "small") {
             passedSmall = true;
           } else {
@@ -194,15 +201,15 @@
           }
         } else {
           setOutput(
-            (got ? "Вывод:\n" + got + "\n\n" : "") +
-              "Неверный ответ. Твой: " + (got.trim() || "(пусто)") + ", Ожидаемый: " + expectedTrim + ".",
+            got ? "Вывод:\n" + got : "",
+            "Неверный ответ. Твой: " + (got.trim() || "(пусто)") + ", Ожидаемый: " + expectedTrim + ".",
             "fail"
           );
           saveCheckResult();
         }
       })
       .catch(function (err) {
-        setOutput("Ошибка: " + (err && err.message ? err.message : String(err)), "error");
+        setOutput("", "Ошибка: " + (err && err.message ? err.message : String(err)), "error");
       })
       .finally(function () {
         running = false;
@@ -216,6 +223,9 @@
     if (typeof block.scrollIntoView === "function") {
       block.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    // Фокус на сам блок: скринридер объявит «Рефлексия» и три вопроса,
+    // а вердикт проверки при этом не перебивается — он придёт из live-региона.
+    block.focus();
   }
 
   function showNextButton() {
@@ -297,13 +307,17 @@
   }
 
   function startPyodide() {
-    setOutput("Загрузка Python...");
+    setOutput("", "Загрузка Python...");
     Promise.resolve(Shared.warmUpPyodide())
       .then(function () {
-        setOutput("Готов к запуску");
+        setOutput("", "Готов к запуску");
       })
       .catch(function (err) {
-        setOutput("Не удалось загрузить Python: " + (err && err.message ? err.message : String(err)), "error");
+        setOutput(
+          "",
+          "Не удалось загрузить Python: " + (err && err.message ? err.message : String(err)),
+          "error"
+        );
       });
   }
 
@@ -313,6 +327,7 @@
     loadTask()
       .catch(function () {
         setOutput(
+          "",
           "Не удалось загрузить задание. Откройте сайт через локальный сервер, а не file://.",
           "error"
         );

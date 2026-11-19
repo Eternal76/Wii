@@ -7,7 +7,7 @@
   --completed-bg: #e7f8ee;
   --available: #1d6fd8;
   --available-bg: #e8f1fc;
-  --locked: #8a93a0;
+  --locked: #5b6775;
   --locked-bg: #eceef1;
   --shadow: 0 8px 24px rgba(27, 36, 48, 0.08);
 }
@@ -18,6 +18,12 @@
 
 [hidden] {
   display: none !important;
+}
+
+/* Один видимый фокус на весь проект; :where — чтобы компоненты могли переопределять. */
+:where(a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--available);
+  outline-offset: 2px;
 }
 
 body {
@@ -209,7 +215,6 @@ h1 {
   background: var(--locked-bg);
   color: var(--locked);
   cursor: not-allowed;
-  opacity: 0.9;
 }
 
 .stage-card.status-locked .stage-status,
@@ -271,6 +276,8 @@ h1 {
 }
 
 .btn-reset {
+  min-width: 44px;
+  min-height: 44px;
   padding: 8px 14px;
   border: 1px solid #d5dce6;
   border-radius: 10px;
@@ -284,4 +291,16 @@ h1 {
   border-color: #d64545;
   color: #d64545;
   background: #fdecec;
+}
+
+/* Уважаем системную настройку: движение не объясняет смысл, подсветка остаётся мгновенной. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

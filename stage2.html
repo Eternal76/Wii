@@ -35,7 +35,7 @@
 
           <section aria-label="Пояснение шага" class="anim-explanation-box">
             <h3 class="anim-heading">Пояснение</h3>
-            <p class="anim-explanation" id="anim-explanation">Нажмите «Шаг вперёд», чтобы начать.</p>
+            <p class="anim-explanation" id="anim-explanation" aria-live="polite">Нажмите «Шаг вперёд», чтобы начать.</p>
           </section>
         </aside>
       </div>
@@ -45,7 +45,7 @@
         <button type="button" class="btn btn-secondary" id="anim-reset">Сброс</button>
         <button type="button" class="btn" id="anim-finish" hidden>Пройти другую анимацию</button>
       </div>
-      <p id="anim-status" class="quiz-status" hidden></p>
+      <p id="anim-status" class="quiz-status" aria-live="polite" hidden></p>
     </article>
   </main>
   <script src="js/storage.js"></script>

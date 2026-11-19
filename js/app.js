@@ -109,9 +109,13 @@
         percent +
         "%</span>" +
         "</div>" +
-        '<div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
+        '<div class="progress-bar" role="progressbar" aria-label="Прогресс этапов" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
         percent +
-        '">' +
+        '" aria-valuetext="Пройдено ' +
+        completed +
+        " из " +
+        STAGES.length +
+        ' этапов">' +
         '<div class="progress-bar-fill" style="width:' +
         percent +
         '%"></div>' +

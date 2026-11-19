@@ -70,7 +70,9 @@
     document.getElementById("module-label").textContent =
       "Модуль " + (currentIndex + 1) + " из " + totalModules;
     document.getElementById("answered-percent").textContent = percent + "%";
-    document.getElementById("answered-bar").setAttribute("aria-valuenow", String(percent));
+    var bar = document.getElementById("answered-bar");
+    bar.setAttribute("aria-valuenow", String(percent));
+    bar.setAttribute("aria-valuetext", "Отвечено " + checked + " из " + total);
     document.getElementById("answered-bar-fill").style.width = percent + "%";
   }
 
@@ -92,7 +94,11 @@
 
   function renderChoiceOptions(task) {
     var options = Shared.stableOptions(String(task.id), task.options);
-    var html = '<div class="options">';
+    // Группа вариантов получает имя от текста задания, иначе скринридер читает только «1 из 4».
+    var html =
+      '<div class="options" role="radiogroup" aria-labelledby="prompt-' +
+      Shared.escapeHtml(String(task.id)) +
+      '">';
     for (var i = 0; i < options.length; i += 1) {
       var option = options[i];
       html +=
@@ -118,14 +124,16 @@
       '<p class="question-meta">Вопрос ' +
       (index + 1) +
       "</p>" +
-      '<p class="question-prompt">' +
+      '<p class="question-prompt" id="prompt-' +
+      Shared.escapeHtml(String(task.id)) +
+      '">' +
       Shared.escapeHtml(task.prompt) +
       "</p>";
     if (task.type === "code_output" && task.code) {
       html += '<pre class="code-block"><code>' + Shared.escapeHtml(task.code) + "</code></pre>";
     }
     html += renderChoiceOptions(task);
-    html += '<div class="question-feedback" hidden></div>';
+    html += '<div class="question-feedback" aria-live="polite" aria-atomic="true" hidden></div>';
     html += "</section>";
     return html;
   }
@@ -322,6 +330,64 @@
 
   // ---- Тест «Я знаю базу» (пропуск этапа) ----
 
+  var FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  // Кнопка, открывшая модалку: на неё вернётся фокус после закрытия.
+  var placementOpener = null;
+
+  // Фокусируемые элементы диалога, кроме отключённых и скрытых.
+  function placementFocusables() {
+    var modal = document.getElementById("placement-modal");
+    var nodes = modal.querySelectorAll(FOCUSABLE);
+    var list = [];
+    for (var i = 0; i < nodes.length; i += 1) {
+      var node = nodes[i];
+      if (node.disabled || node.hidden || node.type === "hidden") {
+        continue;
+      }
+      if (node.closest("[hidden]")) {
+        continue;
+      }
+      list.push(node);
+    }
+    return list;
+  }
+
+  // Ловушка фокуса и Escape, пока модалка открыта.
+  function trapPlacementFocus(event) {
+    var modal = document.getElementById("placement-modal");
+    if (!modal || modal.hidden) {
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closePlacement();
+      return;
+    }
+    if (event.key !== "Tab") {
+      return;
+    }
+    var list = placementFocusables();
+    if (!list.length) {
+      event.preventDefault();
+      return;
+    }
+    var first = list[0];
+    var last = list[list.length - 1];
+    var active = document.activeElement;
+    if (event.shiftKey) {
+      // Shift+Tab с первого элемента (или из-за пределов диалога) — на последний.
+      if (active === first || !modal.contains(active)) {
+        event.preventDefault();
+        last.focus();
+      }
+      return;
+    }
+    if (active === last || !modal.contains(active)) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   function showPlacementStatus(text, kind) {
     var el = document.getElementById("placement-status");
     el.hidden = false;
@@ -346,7 +412,11 @@
   }
 
   function openPlacement() {
+    placementOpener = document.activeElement;
     document.getElementById("placement-modal").hidden = false;
+    // Стиль чужой, поэтому блокируем прокрутку инлайном.
+    document.body.style.overflow = "hidden";
+    document.getElementById("close-placement").focus();
     if (placementQuestions.length) {
       renderPlacement();
       return;
@@ -366,6 +436,11 @@
 
   function closePlacement() {
     document.getElementById("placement-modal").hidden = true;
+    document.body.style.overflow = "";
+    if (placementOpener && typeof placementOpener.focus === "function") {
+      placementOpener.focus();
+    }
+    placementOpener = null;
   }
 
   function checkPlacement() {
@@ -426,6 +501,11 @@
       document.getElementById("placement-actions").innerHTML =
         '<button type="button" class="btn" id="placement-back">Вернуться к модулям</button>';
     }
+    // Кнопка «Проверить» исчезла — держим фокус внутри диалога.
+    var next = document.querySelector("#placement-actions .btn");
+    if (next) {
+      next.focus();
+    }
   }
 
   function bindEvents() {
@@ -458,6 +538,7 @@
         closePlacement();
       }
     });
+    document.addEventListener("keydown", trapPlacementFocus);
     document.getElementById("placement-actions").addEventListener("click", function (event) {
       if (event.target.id === "check-placement") {
         checkPlacement();

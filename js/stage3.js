@@ -95,6 +95,11 @@
     button.setAttribute("data-id", block.id);
     button.setAttribute("data-action", inProgram ? "remove" : "add");
     button.textContent = inProgram ? "← Убрать" : "Добавить →";
+    // Подпись называет сам блок: «Добавить» без текста блока скринридеру бесполезно.
+    button.setAttribute(
+      "aria-label",
+      (inProgram ? "Убрать блок: " : "Добавить блок: ") + code.textContent.replace(/\s+/g, " ").trim()
+    );
     li.appendChild(button);
 
     return li;
@@ -110,6 +115,13 @@
   function renderZones() {
     renderList(pool, document.getElementById("block-pool"), false);
     renderList(program, document.getElementById("block-program"), true);
+  }
+
+  function announce(text) {
+    var el = document.getElementById("builder-status");
+    if (el) {
+      el.textContent = text;
+    }
   }
 
   function addToProgram(id) {
@@ -128,6 +140,7 @@
     pool = rest;
     program.push(block);
     renderZones();
+    announce("Блок добавлен, в программе " + program.length + " из " + task.correct_order.length);
   }
 
   function removeFromProgram(id) {
@@ -142,6 +155,7 @@
     program = rest;
     pool = sortPool(pool);
     renderZones();
+    announce("Блок убран, в программе " + program.length + " из " + task.correct_order.length);
   }
 
   function readIds(list) {

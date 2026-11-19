@@ -279,6 +279,12 @@
 }
 
 .modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
   border: none;
   background: transparent;
   font-size: 1.6rem;
@@ -746,6 +752,11 @@
   border-color: var(--available);
 }
 
+.reflection-input:focus-visible {
+  outline: 3px solid var(--available);
+  outline-offset: 2px;
+}
+
 .reflection-block .btn {
   margin-top: 18px;
 }
@@ -765,6 +776,22 @@
   .anim-layout {
     grid-template-columns: 1fr;
   }
+
+  /* На телефоне редактор тянется по высоте, но не съедает весь экран. */
+  #editor,
+  .CodeMirror {
+    height: clamp(220px, 50vh, 420px);
+  }
+
+  /* Длинные строки переносятся с сохранением отступов, блок не рвёт экран. */
+  .code-line {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .code-line .line-text {
+    min-width: 0;
+  }
 }
 
 @media (max-width: 640px) {
@@ -774,5 +801,25 @@
 
   .builder-zones {
     grid-template-columns: 1fr;
+  }
+
+  /* Таблица переменных прокручивается по горизонтали, не ломая вёрстку. */
+  .vars-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .vars-table th,
+  .vars-table td {
+    white-space: nowrap;
+  }
+
+  /* Кнопки запуска остаются под рукой, пока листаешь код. */
+  .editor-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    padding: 8px 0;
+    background: var(--card);
   }
 }

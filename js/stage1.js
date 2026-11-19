@@ -215,7 +215,9 @@
     document.getElementById("answered-count").textContent = String(checked);
     document.getElementById("total-count").textContent = String(total);
     document.getElementById("answered-percent").textContent = percent + "%";
-    document.getElementById("answered-bar").setAttribute("aria-valuenow", String(percent));
+    var bar = document.getElementById("answered-bar");
+    bar.setAttribute("aria-valuenow", String(percent));
+    bar.setAttribute("aria-valuetext", "Отвечено " + checked + " из " + total);
     document.getElementById("answered-bar-fill").style.width = percent + "%";
     if (stageState === "in-progress") {
       renderActions();
@@ -233,7 +235,11 @@
 
   function renderChoiceOptions(question) {
     var options = Shared.stableOptions(String(question.id), question.options);
-    var html = '<div class="options">';
+    // Группа получает имя от текста задания: иначе читается только «1 из 4».
+    var html =
+      '<div class="options" role="radiogroup" aria-labelledby="prompt-' +
+      question.id +
+      '">';
     for (var i = 0; i < options.length; i += 1) {
       var option = options[i];
       html +=
@@ -260,11 +266,17 @@
     var html = '<div class="matching">';
     for (var i = 0; i < question.pairs.length; i += 1) {
       var left = question.pairs[i].left;
+      // Левая часть пары служит названием для своего селекта.
+      var pairId = "match-" + question.id + "-" + i;
       html +=
-        '<div class="matching-left">' +
+        '<div class="matching-left" id="' +
+        pairId +
+        '">' +
         Shared.escapeHtml(left) +
         "</div>" +
-        '<select data-question="' +
+        '<select aria-labelledby="' +
+        pairId +
+        '" data-question="' +
         question.id +
         '" data-left="' +
         Shared.escapeHtml(left) +
@@ -293,7 +305,9 @@
       '<p class="question-meta">Вопрос ' +
       (index + 1) +
       "</p>" +
-      '<p class="question-prompt">' +
+      '<p class="question-prompt" id="prompt-' +
+      question.id +
+      '">' +
       Shared.escapeHtml(question.prompt) +
       "</p>";
     if (question.type === "code_output" && question.code) {
@@ -304,7 +318,7 @@
     } else {
       html += renderChoiceOptions(question);
     }
-    html += '<div class="question-feedback" hidden></div>';
+    html += '<div class="question-feedback" aria-live="polite" aria-atomic="true" hidden></div>';
     html += "</section>";
     return html;
   }

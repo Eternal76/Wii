@@ -20,12 +20,12 @@
 
       <div class="builder-zones">
         <section class="builder-zone">
-          <h3 class="builder-zone-title">Блоки</h3>
-          <ul id="block-pool" class="sortable-list"></ul>
+          <h3 class="builder-zone-title" id="pool-title">Блоки</h3>
+          <ul id="block-pool" class="sortable-list" aria-labelledby="pool-title"></ul>
         </section>
         <section class="builder-zone">
-          <h3 class="builder-zone-title">Программа</h3>
-          <ol id="block-program" class="sortable-list program-list"></ol>
+          <h3 class="builder-zone-title" id="program-title">Программа</h3>
+          <ol id="block-program" class="sortable-list program-list" aria-labelledby="program-title"></ol>
         </section>
       </div>
 
@@ -35,7 +35,9 @@
         <button type="button" class="btn" id="next-task" hidden>Следующая задача</button>
       </div>
 
-      <p id="builder-message" class="builder-message" hidden></p>
+      <p id="builder-message" class="builder-message" hidden aria-live="polite" aria-atomic="true"></p>
+      <!-- Скрытый live-регион для «блок добавлен/убран»: видимое сообщение проверки не перебиваем. -->
+      <p id="builder-status" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap"></p>
     </article>
   </main>
   <script src="js/storage.js"></script>

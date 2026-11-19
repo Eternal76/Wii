@@ -18,13 +18,13 @@
           <span>Отвечено <strong id="answered-count">0</strong> из <strong id="total-count">0</strong></span>
           <span id="answered-percent">0%</span>
         </div>
-        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="answered-bar">
+        <div class="progress-bar" role="progressbar" aria-label="Прогресс ответов" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Отвечено 0 из 0" id="answered-bar">
           <div class="progress-bar-fill" id="answered-bar-fill" style="width:0%"></div>
         </div>
       </section>
       <div id="questions" class="questions"></div>
       <div id="quiz-actions" class="quiz-actions"></div>
-      <p id="quiz-status" class="quiz-status" hidden></p>
+      <p id="quiz-status" class="quiz-status" aria-live="polite" hidden></p>
     </article>
   </main>
   <script src="js/storage.js"></script>
