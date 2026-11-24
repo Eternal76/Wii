@@ -1,0 +1,23 @@
+name: Проверки
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Целостность контента
+        run: node tests/content.check.js
+
+      - name: Сохранение прогресса
+        run: node tests/storage.check.js
+
+      - name: Общие помощники
+        run: node tests/shared.check.js

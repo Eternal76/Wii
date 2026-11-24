@@ -8,6 +8,15 @@
     { number: 5, title: "Самостоятельное написание", href: "stage5.html" }
   ];
 
+  // Склонения счётчика для «Повторить ошибки»: этапы 0 и 2 сюда не входят,
+  // у них нет поштучно проверяемого ответа.
+  var MISTAKE_NOUNS = {
+    1: ["вопрос", "вопроса", "вопросов"],
+    3: ["задача", "задачи", "задач"],
+    4: ["задача", "задачи", "задач"],
+    5: ["задача", "задачи", "задач"]
+  };
+
   // Режим разработчика включается только через ссылку: ?dev=true
   function isDevMode() {
     return new URLSearchParams(window.location.search).get("dev") === "true";
@@ -253,6 +262,57 @@
     section.hidden = !hasData;
   }
 
+  function countMistakes(stageNumber) {
+    var results = Store.getResults("stage" + stageNumber + ":");
+    var count = 0;
+    for (var key in results) {
+      if (Object.prototype.hasOwnProperty.call(results, key) && results[key] && results[key].ok === false) {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+  function renderMistakes() {
+    var section = document.getElementById("mistakes");
+    var content = document.getElementById("mistakes-content");
+    if (!section || !content || !window.Store) {
+      return;
+    }
+
+    var html = "";
+    var total = 0;
+    for (var i = 0; i < STAGES.length; i += 1) {
+      var stage = STAGES[i];
+      var nouns = MISTAKE_NOUNS[stage.number];
+      if (!nouns) {
+        continue;
+      }
+      var count = countMistakes(stage.number);
+      if (!count) {
+        continue;
+      }
+      total += count;
+      html +=
+        '<li class="diagnostics-row">' +
+        '<span class="diagnostics-label">Этап ' +
+        stage.number +
+        " · " +
+        escapeHtml(stage.title) +
+        "</span>" +
+        '<a class="mistakes-link" href="' +
+        stage.href +
+        '?mistakes=1">' +
+        count +
+        " " +
+        plural(count, nouns[0], nouns[1], nouns[2]) +
+        "</a></li>";
+    }
+
+    content.innerHTML = html ? '<ul class="diagnostics-list">' + html + "</ul>" : "";
+    section.hidden = total === 0;
+  }
+
   function renderDevBanner() {
     var banner = document.getElementById("dev-banner");
     if (!banner) {
@@ -288,6 +348,7 @@
     renderDevBanner();
     renderHome();
     renderDiagnostics();
+    renderMistakes();
     bindResetButton();
   });
 })();

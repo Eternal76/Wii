@@ -132,6 +132,27 @@ h1 {
   color: var(--muted);
 }
 
+/* Ссылка «Повторить ошибки» и пояснение режима на страницах этапов. */
+.mistakes-link {
+  color: var(--available);
+  text-decoration: none;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.mistakes-link:hover {
+  text-decoration: underline;
+}
+
+.mistakes-note {
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--available-bg);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 @media (max-width: 640px) {
   .diagnostics-row {
     flex-direction: column;

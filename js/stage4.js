@@ -10,6 +10,45 @@
   var solved = false;
   var running = false;
 
+  // Режим повторения включается ссылкой; отдельной сессии у этапа нет.
+  function isMistakesMode() {
+    return new URLSearchParams(window.location.search).get("mistakes") === "1";
+  }
+
+  // Страницы этапов общие, поэтому пояснение режима создаётся из JS.
+  function showMistakesNote() {
+    var title = document.querySelector(".stage-page h1");
+    if (!title || document.getElementById("mistakes-note")) {
+      return;
+    }
+    var note = document.createElement("p");
+    note.id = "mistakes-note";
+    note.className = "mistakes-note";
+    note.innerHTML =
+      'Режим повторения: задача, где вы ошиблись. <a class="mistakes-link" href="stage4.html">Выйти из режима</a>';
+    title.parentNode.insertBefore(note, title.nextSibling);
+  }
+
+  // Первая проваленная задача, которая ещё есть в списке заданий.
+  function pickMistake(list, prefix) {
+    var results = window.Store ? Store.getResults(prefix) : {};
+    for (var key in results) {
+      if (
+        !Object.prototype.hasOwnProperty.call(results, key) ||
+        !results[key] ||
+        results[key].ok !== false
+      ) {
+        continue;
+      }
+      for (var i = 0; i < list.length; i += 1) {
+        if (String(list[i].id) === key.slice(prefix.length)) {
+          return list[i];
+        }
+      }
+    }
+    return null;
+  }
+
   function showNextButton() {
     var button = document.getElementById("next-task");
     if (button) {
@@ -152,9 +191,14 @@
         throw new Error("Пустой файл задания");
       }
       // Случайная задача, чтобы этап можно было проходить многократно.
-      task = list[Math.floor(Math.random() * list.length)];
+      // В режиме ошибок вместо неё — проваленная задача.
+      var mistakeTask = isMistakesMode() ? pickMistake(list, "stage4:") : null;
+      task = mistakeTask || list[Math.floor(Math.random() * list.length)];
       if (!task) {
         throw new Error("Пустой файл задания");
+      }
+      if (mistakeTask) {
+        showMistakesNote();
       }
       hints = hintsData["stage4_task" + String(task.id).replace("task_", "")] || [];
       renderTask();

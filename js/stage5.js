@@ -16,6 +16,51 @@
   var solved = false;
   var running = false;
 
+  // Режим повторения включается ссылкой, дальше живёт в сессии этапа.
+  function isMistakesMode() {
+    return new URLSearchParams(window.location.search).get("mistakes") === "1";
+  }
+
+  // Страницы этапов общие, поэтому пояснение режима создаётся из JS.
+  function showMistakesNote() {
+    var title = document.querySelector(".stage-page h1");
+    if (!title || document.getElementById("mistakes-note")) {
+      return;
+    }
+    var note = document.createElement("p");
+    note.id = "mistakes-note";
+    note.className = "mistakes-note";
+    note.innerHTML =
+      'Режим повторения: задача, где вы ошиблись. <a class="mistakes-link" href="stage5.html">Выйти из режима</a>';
+    // Без сброса сессии выход вернул бы ту же задачу из Store.
+    note.querySelector(".mistakes-link").addEventListener("click", function () {
+      if (S) {
+        S.clearSession("stage5");
+      }
+    });
+    title.parentNode.insertBefore(note, title.nextSibling);
+  }
+
+  // Первая проваленная задача, которая ещё есть в списке заданий.
+  function pickMistake(list, prefix) {
+    var results = S ? S.getResults(prefix) : {};
+    for (var key in results) {
+      if (
+        !Object.prototype.hasOwnProperty.call(results, key) ||
+        !results[key] ||
+        results[key].ok !== false
+      ) {
+        continue;
+      }
+      for (var i = 0; i < list.length; i += 1) {
+        if (String(list[i].id) === key.slice(prefix.length)) {
+          return list[i];
+        }
+      }
+    }
+    return null;
+  }
+
   function debounce(fn) {
     var timer = null;
     return function () {
@@ -281,11 +326,12 @@
         if (!list.length) {
           throw new Error("Пустой файл задания");
         }
-        // Черновик кода привязан к задаче: возвращаем ту же, что была до перезагрузки.
+        // В режиме ошибок — проваленная задача, иначе та же, что была до перезагрузки.
+        var mistakeTask = isMistakesMode() ? pickMistake(list, "stage5:") : null;
         var saved = S ? S.getSession("stage5") : null;
         var savedId = saved && saved.id;
-        task = null;
-        for (var i = 0; i < list.length; i += 1) {
+        task = mistakeTask;
+        for (var i = 0; i < list.length && !task; i += 1) {
           if (list[i] && list[i].id === savedId) {
             task = list[i];
           }
@@ -296,6 +342,9 @@
         }
         if (!task) {
           throw new Error("Пустой файл задания");
+        }
+        if (mistakeTask) {
+          showMistakesNote();
         }
         if (S) {
           S.setSession("stage5", { id: task.id });

@@ -15,6 +15,31 @@
   // Меньше этого числа восстановленных вопросов — сессия считается битой.
   var MIN_RESTORE = 8;
 
+  // Режим повторения включается ссылкой, дальше живёт в сессии.
+  function isMistakesMode() {
+    return new URLSearchParams(window.location.search).get("mistakes") === "1";
+  }
+
+  // Страницы этапов общие, поэтому пояснение режима создаётся из JS.
+  function showMistakesNote() {
+    var title = document.querySelector(".stage-page h1");
+    if (!title || document.getElementById("mistakes-note")) {
+      return;
+    }
+    var note = document.createElement("p");
+    note.id = "mistakes-note";
+    note.className = "mistakes-note";
+    note.innerHTML =
+      'Режим повторения: только вопросы, где вы ошиблись. <a class="mistakes-link" href="stage1.html">Выйти из режима</a>';
+    // Без сброса сессии выход вернул бы ту же сессию ошибок из Store.
+    note.querySelector(".mistakes-link").addEventListener("click", function () {
+      if (S) {
+        S.clearSession(SESSION_KEY);
+      }
+    });
+    title.parentNode.insertBefore(note, title.nextSibling);
+  }
+
   var questions = [];
   // Ответы ученика: { id: "вариант" } или { id: { left: right } } для matching.
   var answers = {};
@@ -70,6 +95,42 @@
     persistSession();
   }
 
+  // Вопросы, проверка которых закончилась ошибкой и которые ещё есть в JSON.
+  function selectMistakes(all) {
+    var results = S ? S.getResults(SESSION_KEY + ":") : {};
+    var wrong = {};
+    for (var key in results) {
+      if (Object.prototype.hasOwnProperty.call(results, key) && results[key] && results[key].ok === false) {
+        wrong[key.slice(SESSION_KEY.length + 1)] = true;
+      }
+    }
+    var picked = [];
+    for (var i = 0; i < all.length; i += 1) {
+      if (wrong[String(all[i].id)]) {
+        picked.push(all[i]);
+      }
+    }
+    return picked;
+  }
+
+  // Новая сессия: в режиме ошибок — только проваленные вопросы.
+  function startSession(all, requested) {
+    var mistakes = requested;
+    questions = mistakes ? selectMistakes(all) : [];
+    if (!questions.length) {
+      mistakes = false;
+      questions = selectQuestions(all);
+    }
+    answers = {};
+    results = {};
+    session = { ids: [], answers: {}, results: {}, done: false, mistakes: mistakes };
+    persistSession();
+    // Мягко объясняем, почему набор всё-таки случайный.
+    if (requested && !mistakes) {
+      showStatus("Ошибок не осталось — вот случайный набор вопросов.", "pass");
+    }
+  }
+
   // Восстанавливает незавершённую сессию: те же вопросы в том же порядке.
   function restoreSession(all) {
     if (!S) {
@@ -91,13 +152,21 @@
       }
     }
     // Вопросы могли переехать в stage1.json — тогда начинаем заново.
-    if (picked.length < MIN_RESTORE) {
+    // В сессии ошибок может быть 1–2 вопроса, порог 8 ей не подходит.
+    var minPicked = saved.mistakes === true ? 1 : MIN_RESTORE;
+    if (picked.length < minPicked) {
       return false;
     }
     questions = picked;
     answers = saved.answers || {};
     results = saved.results || {};
-    session = { ids: [], answers: answers, results: results, done: false };
+    session = {
+      ids: [],
+      answers: answers,
+      results: results,
+      done: false,
+      mistakes: saved.mistakes === true
+    };
     persistSession();
     return true;
   }
@@ -584,15 +653,21 @@
   }
 
   function loadQuestions() {
+    var requested = isMistakesMode();
     Shared.loadJson("data/stage1.json")
       .then(function (data) {
         // Незавершённая сессия возвращает те же вопросы с ответами после F5.
-        if (!restoreSession(data)) {
-          questions = selectQuestions(data);
-          answers = {};
-          results = {};
-          session = { ids: [], answers: {}, results: {}, done: false };
-          persistSession();
+        var restored = restoreSession(data);
+        // Вошли по ссылке «Повторить ошибки», а сессия от обычного прохождения —
+        // режим важнее: собираем набор из ошибок заново.
+        if (restored && requested && !session.mistakes) {
+          restored = false;
+        }
+        if (!restored) {
+          startSession(data, requested);
+        }
+        if (session && session.mistakes) {
+          showMistakesNote();
         }
         renderQuestions();
         restoreAnswers();
